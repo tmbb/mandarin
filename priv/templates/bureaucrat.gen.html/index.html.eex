@@ -1,0 +1,30 @@
+<section class="content-header">
+  <h1>
+    <%= schema.human_plural %>
+    <small>Optional description</small>
+  </h1>
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
+    <li class="active">index</li>
+  </ol>
+</section>
+
+
+
+<section class="content container-fluid">
+  <%# Filters %>
+  <div class="box-group">
+    <%%= render "filters.html", assigns %>
+  </div>
+
+  <%# Table %>
+  <div class="box box-primary with-border">
+    <div class="box-body">
+      <%%= render "table.html", assigns %>
+    </div>
+    <div class="box-footer">
+      <span><%%= link "New <%= schema.human_singular %>", to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :new) %></span>
+    </div>
+  </div>
+</section>
+

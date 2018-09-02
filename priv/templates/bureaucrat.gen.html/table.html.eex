@@ -1,0 +1,31 @@
+
+<table class="table">
+  <thead>
+    <tr>
+<%= for {k, _} <- schema.attrs do %>      <th><%= Bureaucrat.Naming.humanize(Atom.to_string(k)) %></th>
+<% end %>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%%= for <%= schema.singular %> <- @<%= schema.plural %> do %>
+    <tr>
+<%= for {k, _} <- schema.attrs do %>      <td><%%= <%= schema.singular %>.<%= k %> %></td>
+<% end %>
+      <td>
+        <%%# Icon definitions %>
+        <%% show_icon = content_tag(:i, "", class: "fa fa-eye", title: "Show") %>
+        <%% edit_icon = content_tag(:i, "", class: "fa fa-edit", title: "Edit") %>
+        <%% delete_icon = content_tag(:i, "", class: "fa fa-trash", title: "Delete") %>
+        <%%# Links %>
+        <%# Links %>
+        <div class="pull-right">
+          <%%= link show_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :show, <%= schema.singular %>) %> &nbsp;
+          <%%= link edit_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, <%= schema.singular %>) %> &nbsp;
+          <%%= link delete_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :delete, <%= schema.singular %>), method: :delete, data: [confirm: "Are you sure?"], class: "text-danger"  %>
+        </div>
+      </td>
+    </tr>
+<%% end %>
+  </tbody>
+</table>

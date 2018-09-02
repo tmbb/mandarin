@@ -1,0 +1,20 @@
+<section class="content-header">
+  <h1>
+    Edit <%= schema.human_singular %>
+    <small><%= schema.human_singular %> (<%= schema.human_singular  %> ID: <%%= @<%= schema.singular %>.id %>)</small>
+  </h1>
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
+    <li class="active">Edit</li>
+  </ol>
+</section>
+
+<section class="content container-fluid">
+  <div class="box box-primary with-border">
+    <div class="box-body">
+      <%%= render "form.html", Map.put(assigns, :action, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :create)) %>
+    </div>
+    <div class="box-footer">
+      <span><%%= link "Back", to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :index) %></span>    </div>
+  </div>
+</section>
