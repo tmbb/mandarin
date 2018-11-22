@@ -1,7 +1,7 @@
 defmodule Bureaucrat.Naming do
-  @moduledoc """
-  Conveniences for inflecting and working with names in Bureaucrat.
-  """
+  @moduledoc false
+
+  # Conveniences for inflecting and working with names in Bureaucrat
 
   @doc """
   Extracts the resource name from an alias.
@@ -15,7 +15,7 @@ defmodule Bureaucrat.Naming do
       "user"
 
   """
-  @spec resource_name(String.Chars.t, String.t) :: String.t
+  @spec resource_name(String.Chars.t(), String.t()) :: String.t()
   def resource_name(alias, suffix \\ "") do
     alias
     |> to_string()
@@ -37,11 +37,12 @@ defmodule Bureaucrat.Naming do
       "MyApp.User"
 
   """
-  @spec unsuffix(String.t, String.t) :: String.t
+  @spec unsuffix(String.t(), String.t()) :: String.t()
   def unsuffix(value, suffix) do
     string = to_string(value)
     suffix_size = byte_size(suffix)
     prefix_size = byte_size(string) - suffix_size
+
     case string do
       <<prefix::binary-size(prefix_size), ^suffix::binary>> -> prefix
       _ -> string
@@ -63,7 +64,7 @@ defmodule Bureaucrat.Naming do
       Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
-  @spec underscore(String.t) :: String.t
+  @spec underscore(String.t()) :: String.t()
 
   def underscore(value), do: Macro.underscore(value)
 
@@ -90,16 +91,18 @@ defmodule Bureaucrat.Naming do
       Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
-  @spec camelize(String.t) :: String.t
+  @spec camelize(String.t()) :: String.t()
   def camelize(value), do: Macro.camelize(value)
 
-  @spec camelize(String.t, :lower) :: String.t
+  @spec camelize(String.t(), :lower) :: String.t()
   def camelize("", :lower), do: ""
-  def camelize(<<?_, t :: binary>>, :lower) do
+
+  def camelize(<<?_, t::binary>>, :lower) do
     camelize(t, :lower)
   end
-  def camelize(<<h, _t :: binary>> = value, :lower) do
-    <<_first, rest :: binary>> = camelize(value)
+
+  def camelize(<<h, _t::binary>> = value, :lower) do
+    <<_first, rest::binary>> = camelize(value)
     <<to_lower_char(h)>> <> rest
   end
 
@@ -113,9 +116,10 @@ defmodule Bureaucrat.Naming do
       iex> Bureaucrat.Naming.humanize("user_id")
       "User"
   """
-  @spec humanize(atom | String.t) :: String.t
+  @spec humanize(atom | String.t()) :: String.t()
   def humanize(atom) when is_atom(atom),
     do: humanize(Atom.to_string(atom))
+
   def humanize(bin) when is_binary(bin) do
     bin =
       if String.ends_with?(bin, "_id") do
@@ -124,9 +128,10 @@ defmodule Bureaucrat.Naming do
         bin
       end
 
-    bin |> String.replace("_", " ") |> String.capitalize
+    bin |> String.replace("_", " ") |> String.capitalize()
   end
 end
+
 defmodule Bureaucrat.Naming do
   @moduledoc """
   Conveniences for inflecting and working with names in Bureaucrat.
@@ -144,7 +149,7 @@ defmodule Bureaucrat.Naming do
       "user"
 
   """
-  @spec resource_name(String.Chars.t, String.t) :: String.t
+  @spec resource_name(String.Chars.t(), String.t()) :: String.t()
   def resource_name(alias, suffix \\ "") do
     alias
     |> to_string()
@@ -166,11 +171,12 @@ defmodule Bureaucrat.Naming do
       "MyApp.User"
 
   """
-  @spec unsuffix(String.t, String.t) :: String.t
+  @spec unsuffix(String.t(), String.t()) :: String.t()
   def unsuffix(value, suffix) do
     string = to_string(value)
     suffix_size = byte_size(suffix)
     prefix_size = byte_size(string) - suffix_size
+
     case string do
       <<prefix::binary-size(prefix_size), ^suffix::binary>> -> prefix
       _ -> string
@@ -192,7 +198,7 @@ defmodule Bureaucrat.Naming do
       Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
-  @spec underscore(String.t) :: String.t
+  @spec underscore(String.t()) :: String.t()
 
   def underscore(value), do: Macro.underscore(value)
 
@@ -219,16 +225,18 @@ defmodule Bureaucrat.Naming do
       Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
-  @spec camelize(String.t) :: String.t
+  @spec camelize(String.t()) :: String.t()
   def camelize(value), do: Macro.camelize(value)
 
-  @spec camelize(String.t, :lower) :: String.t
+  @spec camelize(String.t(), :lower) :: String.t()
   def camelize("", :lower), do: ""
-  def camelize(<<?_, t :: binary>>, :lower) do
+
+  def camelize(<<?_, t::binary>>, :lower) do
     camelize(t, :lower)
   end
-  def camelize(<<h, _t :: binary>> = value, :lower) do
-    <<_first, rest :: binary>> = camelize(value)
+
+  def camelize(<<h, _t::binary>> = value, :lower) do
+    <<_first, rest::binary>> = camelize(value)
     <<to_lower_char(h)>> <> rest
   end
 
@@ -242,9 +250,10 @@ defmodule Bureaucrat.Naming do
       iex> Bureaucrat.Naming.humanize("user_id")
       "User"
   """
-  @spec humanize(atom | String.t) :: String.t
+  @spec humanize(atom | String.t()) :: String.t()
   def humanize(atom) when is_atom(atom),
     do: humanize(Atom.to_string(atom))
+
   def humanize(bin) when is_binary(bin) do
     bin =
       if String.ends_with?(bin, "_id") do
@@ -253,6 +262,6 @@ defmodule Bureaucrat.Naming do
         bin
       end
 
-    bin |> String.replace("_", " ") |> String.capitalize
+    bin |> String.replace("_", " ") |> String.capitalize()
   end
 end
