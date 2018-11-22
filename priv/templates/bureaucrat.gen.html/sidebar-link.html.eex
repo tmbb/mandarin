@@ -1,0 +1,15 @@
+
+  <%%# Sidebar links for <%= schema.human_singular %> %>
+  <li class="treeview<%%= if @bureaucrat_resource == :<%= schema.singular %> do %> active menu-open<%% end %>">
+    <a href="#">
+      <i class="fa fa-th"></i> <span><%= schema.human_singular %></span>
+    </a>
+    <ul class="treeview-menu">
+      <li><%%= link(index_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :index)) %></li>
+      <li><%%= link(new_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :new)) %></li>
+      <%%= if Map.get(assigns, :<%= schema.singular %>) && @<%= schema.singular %>.id do %>
+        <li><%%= link(edit_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :edit, @<%= schema.singular %>.id)) %></li>
+        <li><%%= link(delete_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :delete, @<%= schema.singular %>.id), method: :delete, data: [confirm: "Are you sure?"]) %></li>
+      <%% end %>
+    </ul>
+  </li>

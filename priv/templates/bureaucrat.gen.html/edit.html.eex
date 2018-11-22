@@ -5,16 +5,17 @@
   </h1>
   <ol class="breadcrumb">
     <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
-    <li class="active">Edit</li>
+    <li class="active">edit</li>
   </ol>
 </section>
 
 <section class="content container-fluid">
   <div class="box box-primary with-border">
     <div class="box-body">
-      <%%= render "form.html", Map.put(assigns, :action, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :create)) %>
+      <%%= render "form.html", Map.put(assigns, :action, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :update, @<%= schema.singular %>)) %>
     </div>
     <div class="box-footer">
-      <span><%%= link "Back", to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :index) %></span>    </div>
+      <%% back_link_content = [content_tag(:i, "", class: "fa fa-arrow-left"), " Back"]  %>
+      <span><%%= link back_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :index), class: "btn btn-default" %></span>
   </div>
 </section>

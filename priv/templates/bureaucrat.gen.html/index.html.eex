@@ -1,7 +1,7 @@
 <section class="content-header">
   <h1>
     <%= schema.human_plural %>
-    <small>Optional description</small>
+    <small>(Browse <%= schema.human_plural %>)</small>
   </h1>
   <ol class="breadcrumb">
     <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
@@ -9,22 +9,23 @@
   </ol>
 </section>
 
-
-
 <section class="content container-fluid">
-  <%# Filters %>
+  <div class="box box-primary with-border">
+    <div class="box-body">
+      <%%# Table %>
+      <%%= render "table.html", assigns %>
+      <%%# Pagination (TODO: make it work) %>
+      <%%= <%= context.basename %>_<%= schema.singular %>_pagination_widget(@conn, @<%= schema.plural %>, previous: "« Previous", next: "Next »") %>
+    </div>
+
+    <div class="box-footer">
+      <%% new_link_content = [content_tag(:i, "", class: "fa fa-plus"), " New"]  %>
+      <span><%%= link new_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :new), class: "btn btn-default" %></span>
+    </div>
+  </div>
+
+  <%%# Filters %>
   <div class="box-group">
     <%%= render "filters.html", assigns %>
   </div>
-
-  <%# Table %>
-  <div class="box box-primary with-border">
-    <div class="box-body">
-      <%%= render "table.html", assigns %>
-    </div>
-    <div class="box-footer">
-      <span><%%= link "New <%= schema.human_singular %>", to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :new) %></span>
-    </div>
-  </div>
 </section>
-

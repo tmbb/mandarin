@@ -77,13 +77,74 @@ desired effect
 
 <%%# REQUIRED JS SCRIPTS %>
 <%%# Phoenix's Javascript so that "delete links" work as they should %>
-<script src="<%%= static_path(@conn, "/js/app.js") %>"></script>
+<script src="<%%= Routes.static_path(@conn, "/js/app.js") %>"></script>
 <%%# jQuery 3 %>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <%%# Bootstrap 3.3.7 %>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <%%# AdminLTE App %>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.8/js/adminlte.min.js"></script>
+<%# Select2 widget %>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+<script>
+// In your Javascript (external .js resource or <script> tag)
+$(document).ready(function() {
+  $('[data-forage-select2-widget="true"]').each(
+    function(index, node) {
+      // Extract configuration options from the HTML element
+      var baseUrl = node.dataset.url;
+      var field = node.dataset.field;
+      // Next, we create some extra storage to help us convert offset-based pagination
+      // into cursor-based pagination.
+      //
+      // With offset-based pagination, the pages are numbered (i.e. 1, 2, 3...).
+      // On the other hand, with cursor-based pagination, we have only an abstract token,
+      // which serves as a link to the next page.
+      //
+      // To convert page numbers to tokens, we simply define a map that stores the token
+      // for every page number.
+      // That way, Select2 can continue to ask for page number 1, 2, 3, etc. because we
+      // know how to convert the page number into out tokens
+      var lastTerm = "";
+      var pageToAfterToken = {1: null};
+      // Turn the node into a select2 box
+      $(node).select2({
+        // Use AJAX to get JSON data from the server
+        ajax: {
+        url: baseUrl,
+        data: function (params) {
+          var page = params.page || 1;
+          var term = params.term || "";
+          // Build the query
+          var query = {};
+          query["_search[" + field + "][op]"] = "contains";
+          query["_search[" + field + "][val]"] = term;
+          // If we don't have a token or if the query string has changed,
+          // we don't want to reuse the pagination token.
+          var afterToken = pageToAfterToken[page];
+          if(afterToken && lastTerm == term) {
+            query["_pagination[after]"] = afterToken;
+          }
+
+          // Query parameters will be ?search=[term]&type=public
+          return query;
+        },
+        processResults: function (data, params) {
+          var page = params.page || 1
+          lastTerm = params.term || "";
+          // With the request for the current page we also receive
+          // the token for the next page
+          pageToAfterToken[page + 1] = data.pagination.after;
+          return data;
+        },
+        dataType: 'json',
+        placeholder: "..."
+      }
+    });
+  })
+});
+</script>
 
 <%%# Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the

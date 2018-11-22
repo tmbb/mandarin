@@ -5,7 +5,7 @@
   </h1>
   <ol class="breadcrumb">
     <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
-    <li class="active">edit</li>
+    <li class="active">new</li>
   </ol>
 </section>
 
@@ -15,6 +15,7 @@
       <%%= render "form.html", Map.put(assigns, :action, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :create)) %>
     </div>
     <div class="box-footer">
-      <span><%%= link "Back", to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :index) %></span>    </div>
+      <%% back_link_content = [content_tag(:i, "", class: "fa fa-arrow-left"), " Back"]  %>
+      <span><%%= link back_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :index), class: "btn btn-default" %></span>
   </div>
 </section>

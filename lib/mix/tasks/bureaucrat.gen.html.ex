@@ -99,24 +99,71 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
 
   alias Mix.Bureaucrat.{Context, Schema}
   alias Mix.Tasks.Bureaucrat.Gen
+  require EEx
 
   @doc false
   def run(args) do
-    if Mix.Project.umbrella? do
-      Mix.raise "mix bureaucrat.gen.html can only be run inside an application directory"
+    if Mix.Project.umbrella?() do
+      Mix.raise("mix bureaucrat.gen.html can only be run inside an application directory")
     end
 
     {context, schema} = Gen.Context.build(args)
     Gen.Context.prompt_for_code_injection(context)
 
-    binding = [context: context, schema: schema, inputs: inputs(schema), filters: filters(schema)]
+    binding = [
+      context: context,
+      schema: schema,
+      inputs: inputs(context),
+      filters: filters(context)
+    ]
+
     paths = Mix.Bureaucrat.generator_paths()
 
     prompt_for_conflicts(context)
 
     context
+    |> add_links_to_sidebar()
     |> copy_new_files(paths, binding)
     |> print_shell_instructions()
+  end
+
+  @links_end "\n  <%# %% Resource Links - END %% %>\n"
+
+  defp insert_links(file, text) do
+    contents = File.read!(file)
+
+    case String.split(contents, @links_end, parts: 2) do
+      [part1, part2] ->
+        new_contents = part1 <> "\n" <> String.trim_trailing(text) <> @links_end <> part2
+
+        File.write!(file, new_contents)
+
+      # Say something
+
+      _ ->
+        # Say something too
+        nil
+    end
+  end
+
+  EEx.function_from_file(
+    :defp,
+    :sidebar_link,
+    "priv/templates/bureaucrat.gen.html/sidebar-link.html.eex",
+    [:schema]
+  )
+
+  defp add_links_to_sidebar(%Context{schema: schema, context_app: context_app} = context) do
+    web_prefix = Mix.Bureaucrat.web_path(context_app)
+
+    sidebar_template_path =
+      Path.join([web_prefix, "templates", "#{context.basename}_layout", "sidebar.html.eex"])
+
+    if File.exists?(sidebar_template_path) do
+      insert_links(sidebar_template_path, sidebar_link(schema))
+    end
+
+    context
   end
 
   defp prompt_for_conflicts(context) do
@@ -125,9 +172,11 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
     |> Kernel.++(context_files(context))
     |> Mix.Bureaucrat.prompt_for_conflicts()
   end
+
   defp context_files(%Context{generate?: true} = context) do
     Gen.Context.files_to_be_generated(context)
   end
+
   defp context_files(%Context{generate?: false}) do
     []
   end
@@ -140,16 +189,87 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
     ctx_basename = context.basename
 
     [
-      {:eex, "controller.ex",       Path.join([web_prefix, "controllers", web_path, ctx_basename, "#{schema.singular}_controller.ex"])},
-      {:eex, "edit.html.eex",       Path.join([web_prefix, "templates", web_path, ctx_basename, schema.singular, "edit.html.eex"])},
-      {:eex, "filters.html.eex",    Path.join([web_prefix, "templates", web_path, ctx_basename, schema.singular, "filters.html.eex"])},
-      {:eex, "form.html.eex",       Path.join([web_prefix, "templates", web_path, ctx_basename, schema.singular, "form.html.eex"])},
-      {:eex, "index.html.eex",      Path.join([web_prefix, "templates", web_path, ctx_basename, schema.singular, "index.html.eex"])},
-      {:eex, "new.html.eex",        Path.join([web_prefix, "templates", web_path, ctx_basename, schema.singular, "new.html.eex"])},
-      {:eex, "show.html.eex",       Path.join([web_prefix, "templates", web_path, ctx_basename, schema.singular, "show.html.eex"])},
-      {:eex, "table.html.eex",       Path.join([web_prefix, "templates", web_path, ctx_basename, schema.singular, "table.html.eex"])},
-      {:eex, "view.ex",             Path.join([web_prefix, "views", web_path, ctx_basename, "#{schema.singular}_view.ex"])},
-      {:eex, "controller_test.exs", Path.join([test_prefix, "controllers", web_path, ctx_basename, "#{schema.singular}_controller_test.exs"])},
+      {:eex, "controller.ex",
+       Path.join([
+         web_prefix,
+         "controllers",
+         web_path,
+         ctx_basename,
+         "#{schema.singular}_controller.ex"
+       ])},
+      {:eex, "edit.html.eex",
+       Path.join([
+         web_prefix,
+         "templates",
+         web_path,
+         ctx_basename,
+         schema.singular,
+         "edit.html.eex"
+       ])},
+      {:eex, "filters.html.eex",
+       Path.join([
+         web_prefix,
+         "templates",
+         web_path,
+         ctx_basename,
+         schema.singular,
+         "filters.html.eex"
+       ])},
+      {:eex, "form.html.eex",
+       Path.join([
+         web_prefix,
+         "templates",
+         web_path,
+         ctx_basename,
+         schema.singular,
+         "form.html.eex"
+       ])},
+      {:eex, "index.html.eex",
+       Path.join([
+         web_prefix,
+         "templates",
+         web_path,
+         ctx_basename,
+         schema.singular,
+         "index.html.eex"
+       ])},
+      {:eex, "new.html.eex",
+       Path.join([
+         web_prefix,
+         "templates",
+         web_path,
+         ctx_basename,
+         schema.singular,
+         "new.html.eex"
+       ])},
+      {:eex, "show.html.eex",
+       Path.join([
+         web_prefix,
+         "templates",
+         web_path,
+         ctx_basename,
+         schema.singular,
+         "show.html.eex"
+       ])},
+      {:eex, "table.html.eex",
+       Path.join([
+         web_prefix,
+         "templates",
+         web_path,
+         ctx_basename,
+         schema.singular,
+         "table.html.eex"
+       ])},
+      {:eex, "view.ex",
+       Path.join([web_prefix, "views", web_path, ctx_basename, "#{schema.singular}_view.ex"])},
+      {:eex, "controller_test.exs",
+       Path.join([
+         test_prefix,
+         "controllers",
+         web_path,
+         ctx_basename,
+         "#{schema.singular}_controller_test.exs"
+       ])}
     ]
   end
 
@@ -164,89 +284,159 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   @doc false
   def print_shell_instructions(%Context{schema: schema, context_app: ctx_app} = context) do
     if schema.web_namespace do
-      Mix.shell.info """
+      Mix.shell().info("""
 
-      Add the resource to your #{schema.web_namespace} :browser scope in #{Mix.Bureaucrat.web_path(ctx_app)}/router.ex:
+      Add the resource to your #{schema.web_namespace} :browser scope in #{
+        Mix.Bureaucrat.web_path(ctx_app)
+      }/router.ex:
 
-          scope "/#{schema.web_path}", #{inspect Module.concat(context.web_module, schema.web_namespace)}, as: :#{schema.web_path} do
+          scope "/#{schema.web_path}", #{
+        inspect(Module.concat(context.web_module, schema.web_namespace))
+      }, as: :#{schema.web_path} do
             pipe_through :browser
             ...
-            resources "/#{schema.plural}", #{inspect schema.alias}Controller
+            resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
           end
-      """
+      """)
     else
-      Mix.shell.info """
+      Mix.shell().info("""
 
       Add the resource to your browser scope in #{Mix.Bureaucrat.web_path(ctx_app)}/router.ex:
 
-          resources "/#{schema.plural}", #{inspect schema.alias}Controller
-      """
+          resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+      """)
     end
+
     if context.generate?, do: Gen.Context.print_shell_instructions(context)
   end
 
-  defp inputs(%Schema{} = schema) do
-    Enum.map(schema.attrs, fn
-      {_, {:references, _}} ->
-        {nil, nil, nil}
-      {key, :integer} ->
-        {label(key), ~s(<%= number_input f, #{inspect(key)}, class: "form-control" %>), error(key)}
-      {key, :float} ->
-        {label(key), ~s(<%= number_input f, #{inspect(key)}, step: "any", class: "form-control" %>), error(key)}
-      {key, :decimal} ->
-        {label(key), ~s(<%= number_input f, #{inspect(key)}, step: "any", class: "form-control" %>), error(key)}
-      {key, :boolean} ->
-        {label(key), ~s(<%= checkbox f, #{inspect(key)}, class: "form-control"  %>), error(key)}
-      {key, :text} ->
-        {label(key), ~s(<%= textarea f, #{inspect(key)}, class: "form-control"  %>), error(key)}
-      {key, :date} ->
-        {label(key), ~s(<%= date_select f, #{inspect(key)}, class: "form-control"  %>), error(key)}
-      {key, :time} ->
-        {label(key), ~s(<%= time_select f, #{inspect(key)}, class: "form-control"  %>), error(key)}
-      {key, :utc_datetime} ->
-        {label(key), ~s(<%= datetime_select f, #{inspect(key)}, class: "form-control" %>), error(key)}
-      {key, :naive_datetime} ->
-        {label(key), ~s(<%= datetime_select f, #{inspect(key)}, class: "form-control" %>), error(key)}
-      {key, {:array, :integer}} ->
-        {label(key), ~s(<%= multiple_select f, #{inspect(key)}, ["1": 1, "2": 2] %>), error(key)}
-      {key, {:array, _}} ->
-        {label(key), ~s(<%= multiple_select f, #{inspect(key)}, ["Option 1": "option1", "Option 2": "option2"] %>), error(key)}
-      {key, _}  ->
-        {label(key), ~s(<%= text_input f, #{inspect(key)}, class: "form-control" %>), error(key)}
-    end)
+  defp inputs(%Context{schema: schema} = context) do
+    attrs =
+      Enum.map(schema.attrs, fn
+        {_, {:references, _}} ->
+          {nil, nil, nil}
+
+        {key, :integer} ->
+          {label(key), ~s(<%= number_input f, #{inspect(key)}, class: "form-control" %>),
+           error(key)}
+
+        {key, :float} ->
+          {label(key),
+           ~s(<%= number_input f, #{inspect(key)}, step: "any", class: "form-control" %>),
+           error(key)}
+
+        {key, :decimal} ->
+          {label(key),
+           ~s(<%= number_input f, #{inspect(key)}, step: "any", class: "form-control" %>),
+           error(key)}
+
+        {key, :boolean} ->
+          {label(key), ~s(<%= checkbox f, #{inspect(key)}, class: "form-control"  %>), error(key)}
+
+        {key, :text} ->
+          {label(key), ~s(<%= textarea f, #{inspect(key)}, class: "form-control"  %>), error(key)}
+
+        {key, :date} ->
+          {label(key), ~s(<%= date_select f, #{inspect(key)}, class: "form-control"  %>),
+           error(key)}
+
+        {key, :time} ->
+          {label(key), ~s(<%= time_select f, #{inspect(key)}, class: "form-control"  %>),
+           error(key)}
+
+        {key, :utc_datetime} ->
+          {label(key), ~s(<%= datetime_select f, #{inspect(key)}, class: "form-control" %>),
+           error(key)}
+
+        {key, :naive_datetime} ->
+          {label(key), ~s(<%= datetime_select f, #{inspect(key)}, class: "form-control" %>),
+           error(key)}
+
+        {key, {:array, :integer}} ->
+          {label(key), ~s(<%= multiple_select f, #{inspect(key)}, ["1": 1, "2": 2] %>),
+           error(key)}
+
+        {key, {:array, _}} ->
+          {label(key),
+           ~s(<%= multiple_select f, #{inspect(key)}, ["Option 1": "option1", "Option 2": "option2"] %>),
+           error(key)}
+
+        {key, _} ->
+          {label(key), ~s(<%= text_input f, #{inspect(key)}, class: "form-control" %>),
+           error(key)}
+      end)
+
+    assocs =
+      Enum.map(schema.assocs, fn
+        {key, _atom_singular_id, full_module_name, _atom_plural} ->
+          module_alias = full_module_name |> String.split(".") |> Enum.at(-1)
+          display = "&#{module_alias}.display/1"
+          field = "#{module_alias}.select_search_field()"
+          path = "Routes.#{context.basename}_#{key}_path(@conn, :select)"
+
+          {label(key),
+           ~s'''
+           <%= forage_select f, :#{key},
+                      display: #{display},
+                      path: #{path},
+                      remote_field: #{field} %>\
+           ''', error(key)}
+      end)
+
+    attrs ++ assocs
   end
 
-  def filters(%Schema{} = schema) do
-    Enum.map(schema.attrs, fn {key, field_type} ->
-      type =
-        case field_type do
-          {:references, _} -> nil
-          :integer -> :numeric
-          :float -> :numeric
-          :decimal -> :numeric
-          :boolean -> nil
-          :text -> :text
-          :string -> :text
-          :date -> :numeric
-          :time -> :numeric
-          :utc_datetime -> :numeric
-          :naive_datetime -> :numeric
-          _ -> nil
+  defp filters(%Context{schema: schema} = context) do
+    simple_filters =
+      Enum.map(schema.attrs, fn {key, field_type} ->
+        type =
+          case field_type do
+            {:references, _} -> nil
+            :integer -> :numeric
+            :float -> :numeric
+            :decimal -> :numeric
+            :boolean -> nil
+            :text -> :text
+            :string -> :text
+            :date -> :numeric
+            :time -> :numeric
+            :utc_datetime -> :numeric
+            :naive_datetime -> :numeric
+            _ -> nil
+          end
+
+        case type do
+          nil ->
+            ""
+
+          other when other in [:numeric, :text] ->
+            # Indent the text here becuase it's easier than indenting it in the template
+            """
+                    <%= forage_horizontal_form_group #{inspect(key)} do %>
+                      <%= forage_#{other}_filter(f, #{inspect(key)}) %>
+                    <% end %>\
+            """
         end
+      end)
 
-      case type do
-        nil ->
-          ""
+    assoc_filters =
+      Enum.map(schema.assocs, fn {key, _, full_module_name, _} ->
+        module_alias = full_module_name |> String.split(".") |> Enum.at(-1)
+        display = "&#{module_alias}.display/1"
+        field = "#{module_alias}.select_search_field()"
+        path = "Routes.#{context.basename}_#{key}_path(@conn, :select)"
 
-        other when other in [:numeric, :text] ->
-          # Indent the text here becuase it's easier than indenting it in the template
-          """
-                  <%= forage_horizontal_form_group #{inspect(key)} do %>
-                    <%= forage_#{other}_filter(f, #{inspect(key)}) %>
-                  <% end %>\
-          """
-      end
-    end)
+        """
+                <%= forage_horizontal_form_group #{inspect(key)} do %>
+                  <%= forage_select_filter f, :#{key},
+                        display: #{display},
+                        path: #{path},
+                        remote_field: #{field} %>
+                <% end %>\
+        """
+      end)
+
+    simple_filters ++ assoc_filters
   end
 
   defp label(key) do

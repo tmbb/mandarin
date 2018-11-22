@@ -1,7 +1,7 @@
 <section class="content-header">
   <h1>
     Show <%= schema.human_singular %>
-    <small>Optional description</small>
+    <small><%= schema.human_singular %> (<%= schema.human_singular  %> ID: <%%= @<%= schema.singular %>.id %>)</small>
   </h1>
   <ol class="breadcrumb">
     <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
@@ -18,12 +18,19 @@
           <strong><%= Bureaucrat.Naming.humanize(Atom.to_string(k)) %>:</strong>
           <%%= @<%= schema.singular %>.<%= k %> %>
         </li>
+      <% end %><%= for {k, _, full_module_name, _} <- schema.assocs do %>
+        <li>
+          <strong><%= Bureaucrat.Naming.humanize(Atom.to_string(k)) %>:</strong><% module_alias = full_module_name |> String.split(".") |> Enum.at(-1) %>
+          <%%= <%= module_alias %>.display(@<%= schema.singular %>.<%= k %>) %>
+        </li>
       <% end %>
       </ul>
     </div>
     <div class="box-footer">
-      <span><%%= link "Edit", to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, @<%= schema.singular %>) %></span>
-      <span><%%= link "Back", to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :index) %></span>
+      <%% edit_link_content = [content_tag(:i, "", class: "fa fa-edit"), " Edit"] %>
+      <%% back_link_content = [content_tag(:i, "", class: "fa fa-arrow-left"), " Back"]  %>
+      <span><%%= link edit_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, @<%= schema.singular %>), class: "btn btn-default" %></span>
+      <span><%%= link back_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :index), class: "btn btn-default"  %></span>
   </div>
 </section>
 

@@ -1,4 +1,4 @@
-
+<% preload = for {key, _, _, _} <- schema.assocs, do: key %>
   alias <%= inspect schema.module %>
 
   @doc """
@@ -13,9 +13,8 @@
       [%<%= inspect schema.alias %>{}, ...]
 
   """
-  def list_<%= schema.plural %>(params) do
-    {_plan, query} = Forage.build_query(params, <%= inspect schema.alias %>)
-    Repo.all(query)
+  def list_<%= schema.plural %>(params) do<% [{default_sort_field, _type} | _attrs] = schema.attrs %>
+    Forage.paginate(params, <%= inspect schema.alias %>, Repo, sort: [:<%= default_sort_field %>, :id], preload: <%= inspect(preload) %>)
   end
 
   @doc """
@@ -32,7 +31,7 @@
       ** (Ecto.NoResultsError)
 
   """
-  def get_<%= schema.singular %>!(id), do: Repo.get!(<%= inspect schema.alias %>, id)
+  def get_<%= schema.singular %>!(id), do: Repo.get!(<%= inspect schema.alias %>, id) |> Repo.preload(<%= inspect(preload) %>)
 
   @doc """
   Creates a <%= schema.singular %>.

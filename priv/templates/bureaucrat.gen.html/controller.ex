@@ -3,8 +3,13 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
 
   alias <%= inspect context.module %>
   alias <%= inspect schema.module %>
+  alias ForageWeb.ForageController
 
-  plug Bureaucrat.Plugs.Resource, %{type: :<%= schema.singular %>}
+  plug :assign_bureaucrat_resource
+
+  def assign_bureaucrat_resource(conn, _opts) do
+    assign(conn, :bureaucrat_resource, :<%= schema.singular %>)
+  end
 
   def index(conn, params) do
     <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)
@@ -22,6 +27,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
         conn
         |> put_flash(:info, "<%= schema.human_singular %> created successfully.")
         |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, <%= schema.singular %>))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
@@ -46,17 +52,26 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
         conn
         |> put_flash(:info, "<%= schema.human_singular %> updated successfully.")
         |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, <%= schema.singular %>))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", <%= schema.singular %>: <%= schema.singular %>, changeset: changeset)
     end
   end
 
-  def delete(conn, %{"id" => id}) do
+  def delete(conn, %{"id" => id} = params) do
     <%= schema.singular %> = <%= inspect context.alias %>.get_<%= schema.singular %>!(id)
     {:ok, _<%= schema.singular %>} = <%= inspect context.alias %>.delete_<%= schema.singular %>(<%= schema.singular %>)
+    # After deleting, remain on the same page
+    redirect_params = Map.take(params, ["_pagination"])
 
     conn
     |> put_flash(:info, "<%= schema.human_singular %> deleted successfully.")
-    |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :index))
+    |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :index, redirect_params))
+  end
+
+  def select(conn, params) do
+    <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)
+    data = ForageController.forage_select_data(<%= schema.plural %>, &<%= inspect(schema.alias) %>.display/1)
+    json(conn, data)
   end
 end

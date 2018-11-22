@@ -1,16 +1,21 @@
-
 <table class="table">
   <thead>
     <tr>
-<%= for {k, _} <- schema.attrs do %>      <th><%= Bureaucrat.Naming.humanize(Atom.to_string(k)) %></th>
+<%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}]   do %>      <th><%%= <%= context.basename %>_<%= schema.singular %>_sort_link(@conn, :<%= k %>, <%= k |> to_string() |> Bureaucrat.Naming.humanize() |> inspect() %>) %></th>
+<% end %><%= for {k, _, _, _} <- schema.assocs do %>      <th><%= k |> to_string() |> Bureaucrat.Naming.humanize() %></th>
 <% end %>
       <th></th>
     </tr>
   </thead>
   <tbody>
-<%%= for <%= schema.singular %> <- @<%= schema.plural %> do %>
+<%%= for <%= schema.singular %> <- @<%= schema.plural %>.entries do %>
     <tr>
-<%= for {k, _} <- schema.attrs do %>      <td><%%= <%= schema.singular %>.<%= k %> %></td>
+<%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}] do %>      <td><%%= <%= schema.singular %>.<%= k %> %></td>
+<% end %><%= for {k, _, full_module_name, _} <- schema.assocs do %><% module_alias = full_module_name |> String.split(".") |> Enum.at(-1) %>      <td>
+        <a href="<%%= Routes.<%= context.basename %>_<%= k %>_path(@conn, :show, <%= schema.singular %>.<%= k %>.id) %>">
+          <%%= <%= schema.singular %>.<%= k %> && <%= module_alias %>.display(<%= schema.singular %>.<%= k %>) %>
+        </a>
+      </td>
 <% end %>
       <td>
         <%%# Icon definitions %>
@@ -18,11 +23,10 @@
         <%% edit_icon = content_tag(:i, "", class: "fa fa-edit", title: "Edit") %>
         <%% delete_icon = content_tag(:i, "", class: "fa fa-trash", title: "Delete") %>
         <%%# Links %>
-        <%# Links %>
         <div class="pull-right">
           <%%= link show_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :show, <%= schema.singular %>) %> &nbsp;
           <%%= link edit_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, <%= schema.singular %>) %> &nbsp;
-          <%%= link delete_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :delete, <%= schema.singular %>), method: :delete, data: [confirm: "Are you sure?"], class: "text-danger"  %>
+          <%%= link delete_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :delete, <%= schema.singular %>, @conn.params), method: :delete, data: [confirm: "Are you sure?"], class: "text-danger"  %>
         </div>
       </td>
     </tr>
