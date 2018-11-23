@@ -97,7 +97,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   """
   use Mix.Task
 
-  alias Mix.Bureaucrat.{Context, Schema}
+  alias Mix.Bureaucrat.Context
   alias Mix.Tasks.Bureaucrat.Gen
   require EEx
 
@@ -292,10 +292,10 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
 
           scope "/#{schema.web_path}", #{
         inspect(Module.concat(context.web_module, schema.web_namespace))
-      }, as: :#{schema.web_path} do
-            pipe_through :browser
+      }, as: :#{context.basename}_#{schema.web_path} do
+            pipe_through([:browser, :#{context.basename}_layout])
             ...
-            resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+            Buraucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
           end
       """)
     else
@@ -303,7 +303,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
 
       Add the resource to your browser scope in #{Mix.Bureaucrat.web_path(ctx_app)}/router.ex:
 
-          resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+          Bureaucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
       """)
     end
 
