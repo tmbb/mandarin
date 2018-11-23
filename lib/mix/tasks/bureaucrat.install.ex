@@ -53,9 +53,10 @@ defmodule Mix.Tasks.Bureaucrat.Install do
     context_app = Mix.Bureaucrat.context_app()
     web_prefix = Mix.Bureaucrat.web_path(context_app)
     _test_prefix = Mix.Bureaucrat.web_test_path(context_app)
-    layout_dir = "#{install.context_underscore}_layout"
 
     install = build(args, web_prefix)
+
+    layout_dir = "#{install.context_underscore}_layout"
 
     # These paths are relative to the user's project (because they are used at runtime)
     layout_html_path = Path.join([web_prefix, "templates", layout_dir, "layout.html.eex"])
