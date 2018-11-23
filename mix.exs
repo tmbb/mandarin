@@ -21,6 +21,7 @@ defmodule Bureaucrat.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:phoenix, "~> 1.4"},
       {:forage, git: "https://github.com/tmbb/forage.git"},
       {:ecto, "~> 3.0", override: true},
       {:ecto_sql, "~> 3.0", override: true}
