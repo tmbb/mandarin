@@ -123,34 +123,50 @@ defmodule Mix.Tasks.Bureaucrat.Install do
   def print_shell_instructions(%Install{} = install) do
     app = Mix.Bureaucrat.context_app()
 
+    %Install{
+      context_camel_case: context_camel_case,
+      context_underscore: ctx,
+      web_module: web_module,
+      web_path: web_path,
+      layout_view_camel_case: layout_view_camel_case,
+      layout_view_underscore: layout_view_underscore
+    } = install
+
     Mix.shell().info("""
     The following files have been generated:
 
-      * "#{app}/lib/#{install.web_path}/views/#{install.layout_view_underscore}.ex"
+      * "#{app}/lib/#{web_path}/views/#{layout_view_underscore}.ex"
           - the view for the admin controllers
 
-      * "#{app}/lib/#{install.web_path}/templates/#{install.layout_view_underscore}/layout.html.eex"
+      * "#{app}/lib/#{web_path}/templates/#{layout_view_underscore}/layout.html.eex"
           - the layout for the admin pages
 
-      * "#{app}/lib/#{install.web_path}/templates/#{install.layout_view_underscore}/sidebar-links.html.eex"
+      * "#{app}/lib/#{web_path}/templates/#{layout_view_underscore}/sidebar-links.html.eex"
           - the sidebar links for the admin pages;
             when a new resource is generated, a new link will be appended to this list
 
-      * "#{app}/lib/#{install.web_path}/templates/#{install.layout_view_underscore}/sidebar.html.eex"
+      * "#{app}/lib/#{web_path}/templates/#{layout_view_underscore}/sidebar.html.eex"
           - template for the sidebar in the admin pages
 
     Now, you must customize your router, so that your pages can make use of the new layout.
-    Require Bureaucrat.Router in your router in #{install.web_path}/router.ex:
+    Require Bureaucrat.Router in your router in #{web_path}/router.ex:
 
         require Bureaucrat.Router
 
-    Add a new pipeline to your router in #{install.web_path}/router.ex:
+    Add a new pipeline to your router in #{web_path}/router.ex:
 
-        pipeline :#{install.layout_view_underscore} do
-          plug(:put_layout, {#{install.web_module}.#{install.layout_view_camel_case}, "layout.html"})
+        pipeline :#{ctx}_layout do
+          plug(:put_layout, {#{web_module}.#{layout_view_camel_case}, "layout.html"})
         end
 
-    The admin routes must be sent through this pipeline.
+    The admin routes must be sent through this pipeline so that they use the right layout.
+
+    You should also add a new scope, under which you will add the routes:
+
+        scope "/#{ctx}", #{web_module}.#{context_camel_case}, as: :#{ctx} do
+          pipe_through([:browser, :#{ctx}_layout])
+          # Add routes here...
+        end
     """)
   end
 end

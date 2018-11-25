@@ -283,29 +283,30 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
 
   @doc false
   def print_shell_instructions(%Context{schema: schema, context_app: ctx_app} = context) do
-    if schema.web_namespace do
-      Mix.shell().info("""
+    # if schema.web_namespace do
 
-      Add the resource to your #{schema.web_namespace} :browser scope in #{
-        Mix.Bureaucrat.web_path(ctx_app)
-      }/router.ex:
+    ctx_web_path = Mix.Bureaucrat.web_path(ctx_app)
+    scope = Module.concat(context.web_module, context.alias)
 
-          scope "/#{schema.web_path}", #{
-        inspect(Module.concat(context.web_module, schema.web_namespace))
-      }, as: :#{context.basename}_#{schema.web_path} do
-            pipe_through([:browser, :#{context.basename}_layout])
-            ...
-            Buraucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
-          end
-      """)
-    else
-      Mix.shell().info("""
+    Mix.shell().info("""
 
-      Add the resource to your browser scope in #{Mix.Bureaucrat.web_path(ctx_app)}/router.ex:
+    Add the resource to your #{schema.web_namespace} :browser scope in #{ctx_web_path}/router.ex:
 
-          Bureaucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
-      """)
-    end
+        scope "/#{schema.web_path}", #{inspect(scope)}, as: :#{context.basename} do
+          pipe_through([:browser, :#{context.basename}_layout])
+          ...
+          Buraucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+        end
+    """)
+
+    # else
+    #   Mix.shell().info("""
+
+    #   Add the resource to your browser scope in #{Mix.Bureaucrat.web_path(ctx_app)}/router.ex:
+
+    #       Bureaucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+    #   """)
+    # end
 
     if context.generate?, do: Gen.Context.print_shell_instructions(context)
   end
