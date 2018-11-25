@@ -1,5 +1,5 @@
 defmodule Bureaucrat.Plugs.Resource do
-  @doc """
+  @moduledoc """
   A trivial plug to add the type of resource to the `conn`.
 
   Currently this is used by the generators to decide which link in the sidebar has focus.

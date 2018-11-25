@@ -5,11 +5,8 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
   alias <%= inspect schema.module %>
   alias ForageWeb.ForageController
 
-  plug :assign_bureaucrat_resource
-
-  def assign_bureaucrat_resource(conn, _opts) do
-    assign(conn, :bureaucrat_resource, :<%= schema.singular %>)
-  end
+  # Adds the the resource type to the conn
+  plug Bureaucrat.Plugs.Resource, :<%= schema.singular %>
 
   def index(conn, params) do
     <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)
