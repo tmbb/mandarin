@@ -1,17 +1,17 @@
-defmodule Bureaucrat.Naming do
+defmodule Mandarin.Naming do
   @moduledoc false
 
-  # Conveniences for inflecting and working with names in Bureaucrat
+  # Conveniences for inflecting and working with names in Mandarin
 
   @doc """
   Extracts the resource name from an alias.
 
   ## Examples
 
-      iex> Bureaucrat.Naming.resource_name(MyApp.User)
+      iex> Mandarin.Naming.resource_name(MyApp.User)
       "user"
 
-      iex> Bureaucrat.Naming.resource_name(MyApp.UserView, "View")
+      iex> Mandarin.Naming.resource_name(MyApp.UserView, "View")
       "user"
 
   """
@@ -30,10 +30,10 @@ defmodule Bureaucrat.Naming do
 
   ## Examples
 
-      iex> Bureaucrat.Naming.unsuffix("MyApp.User", "View")
+      iex> Mandarin.Naming.unsuffix("MyApp.User", "View")
       "MyApp.User"
 
-      iex> Bureaucrat.Naming.unsuffix("MyApp.UserView", "View")
+      iex> Mandarin.Naming.unsuffix("MyApp.UserView", "View")
       "MyApp.User"
 
   """
@@ -54,14 +54,14 @@ defmodule Bureaucrat.Naming do
 
   ## Examples
 
-      iex> Bureaucrat.Naming.underscore("MyApp")
+      iex> Mandarin.Naming.underscore("MyApp")
       "my_app"
 
   In general, `underscore` can be thought of as the reverse of
   `camelize`, however, in some cases formatting may be lost:
 
-      Bureaucrat.Naming.underscore "SAPExample"  #=> "sap_example"
-      Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
+      Mandarin.Naming.underscore "SAPExample"  #=> "sap_example"
+      Mandarin.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
   @spec underscore(String.t()) :: String.t()
@@ -78,17 +78,17 @@ defmodule Bureaucrat.Naming do
 
   ## Examples
 
-      iex> Bureaucrat.Naming.camelize("my_app")
+      iex> Mandarin.Naming.camelize("my_app")
       "MyApp"
 
-      iex> Bureaucrat.Naming.camelize("my_app", :lower)
+      iex> Mandarin.Naming.camelize("my_app", :lower)
       "myApp"
 
   In general, `camelize` can be thought of as the reverse of
   `underscore`, however, in some cases formatting may be lost:
 
-      Bureaucrat.Naming.underscore "SAPExample"  #=> "sap_example"
-      Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
+      Mandarin.Naming.underscore "SAPExample"  #=> "sap_example"
+      Mandarin.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
   @spec camelize(String.t()) :: String.t()
@@ -109,11 +109,11 @@ defmodule Bureaucrat.Naming do
   @doc """
   Converts an attribute/form field into its humanize version.
 
-      iex> Bureaucrat.Naming.humanize(:username)
+      iex> Mandarin.Naming.humanize(:username)
       "Username"
-      iex> Bureaucrat.Naming.humanize(:created_at)
+      iex> Mandarin.Naming.humanize(:created_at)
       "Created at"
-      iex> Bureaucrat.Naming.humanize("user_id")
+      iex> Mandarin.Naming.humanize("user_id")
       "User"
   """
   @spec humanize(atom | String.t()) :: String.t()
@@ -132,9 +132,9 @@ defmodule Bureaucrat.Naming do
   end
 end
 
-defmodule Bureaucrat.Naming do
+defmodule Mandarin.Naming do
   @moduledoc """
-  Conveniences for inflecting and working with names in Bureaucrat.
+  Conveniences for inflecting and working with names in Mandarin.
   """
 
   @doc """
@@ -142,10 +142,10 @@ defmodule Bureaucrat.Naming do
 
   ## Examples
 
-      iex> Bureaucrat.Naming.resource_name(MyApp.User)
+      iex> Mandarin.Naming.resource_name(MyApp.User)
       "user"
 
-      iex> Bureaucrat.Naming.resource_name(MyApp.UserView, "View")
+      iex> Mandarin.Naming.resource_name(MyApp.UserView, "View")
       "user"
 
   """
@@ -164,10 +164,10 @@ defmodule Bureaucrat.Naming do
 
   ## Examples
 
-      iex> Bureaucrat.Naming.unsuffix("MyApp.User", "View")
+      iex> Mandarin.Naming.unsuffix("MyApp.User", "View")
       "MyApp.User"
 
-      iex> Bureaucrat.Naming.unsuffix("MyApp.UserView", "View")
+      iex> Mandarin.Naming.unsuffix("MyApp.UserView", "View")
       "MyApp.User"
 
   """
@@ -188,14 +188,14 @@ defmodule Bureaucrat.Naming do
 
   ## Examples
 
-      iex> Bureaucrat.Naming.underscore("MyApp")
+      iex> Mandarin.Naming.underscore("MyApp")
       "my_app"
 
   In general, `underscore` can be thought of as the reverse of
   `camelize`, however, in some cases formatting may be lost:
 
-      Bureaucrat.Naming.underscore "SAPExample"  #=> "sap_example"
-      Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
+      Mandarin.Naming.underscore "SAPExample"  #=> "sap_example"
+      Mandarin.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
   @spec underscore(String.t()) :: String.t()
@@ -212,17 +212,17 @@ defmodule Bureaucrat.Naming do
 
   ## Examples
 
-      iex> Bureaucrat.Naming.camelize("my_app")
+      iex> Mandarin.Naming.camelize("my_app")
       "MyApp"
 
-      iex> Bureaucrat.Naming.camelize("my_app", :lower)
+      iex> Mandarin.Naming.camelize("my_app", :lower)
       "myApp"
 
   In general, `camelize` can be thought of as the reverse of
   `underscore`, however, in some cases formatting may be lost:
 
-      Bureaucrat.Naming.underscore "SAPExample"  #=> "sap_example"
-      Bureaucrat.Naming.camelize   "sap_example" #=> "SapExample"
+      Mandarin.Naming.underscore "SAPExample"  #=> "sap_example"
+      Mandarin.Naming.camelize   "sap_example" #=> "SapExample"
 
   """
   @spec camelize(String.t()) :: String.t()
@@ -243,11 +243,11 @@ defmodule Bureaucrat.Naming do
   @doc """
   Converts an attribute/form field into its humanize version.
 
-      iex> Bureaucrat.Naming.humanize(:username)
+      iex> Mandarin.Naming.humanize(:username)
       "Username"
-      iex> Bureaucrat.Naming.humanize(:created_at)
+      iex> Mandarin.Naming.humanize(:created_at)
       "Created at"
-      iex> Bureaucrat.Naming.humanize("user_id")
+      iex> Mandarin.Naming.humanize("user_id")
       "User"
   """
   @spec humanize(atom | String.t()) :: String.t()

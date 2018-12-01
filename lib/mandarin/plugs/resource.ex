@@ -1,4 +1,4 @@
-defmodule Bureaucrat.Plugs.Resource do
+defmodule Mandarin.Plugs.Resource do
   @moduledoc """
   A trivial plug to add the type of resource to the `conn`.
 
@@ -11,6 +11,6 @@ defmodule Bureaucrat.Plugs.Resource do
 
   @doc false
   def call(conn, default) do
-    assign(conn, :bureaucrat_resource, default)
+    assign(conn, :mandarin_resource, default)
   end
 end

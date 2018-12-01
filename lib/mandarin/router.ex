@@ -1,11 +1,11 @@
-defmodule Bureaucrat.Router do
+defmodule Mandarin.Router do
   @moduledoc """
   Macros to simplify the definition of routes.
   """
   require Phoenix.Router
 
   @doc """
-  Add routes for a full-fledged Bureaucrat controller.
+  Add routes for a full-fledged Mandarin controller.
 
   The same as `Phoenix.Router.resources/3`, but with an extra `<resource>/select` route,
   for use with `Forage`'s select widget.

@@ -2,7 +2,7 @@ defmodule <%= module %> do
   @moduledoc """
   Provides presence tracking to channels and processes.
 
-  See the [`Bureaucrat.Presence`](http://hexdocs.pm/bureaucrat/Bureaucrat.Presence.html)
+  See the [`Mandarin.Presence`](http://hexdocs.pm/mandarin/Mandarin.Presence.html)
   docs for more details.
 
   ## Usage
@@ -34,7 +34,7 @@ defmodule <%= module %> do
 
   Finally, a diff of presence join and leave events will be sent to the
   client as they happen in real-time with the "presence_diff" event.
-  See `Bureaucrat.Presence.list/2` for details on the presence data structure.
+  See `Mandarin.Presence.list/2` for details on the presence data structure.
 
   ## Fetching Presence Information
 
@@ -47,8 +47,8 @@ defmodule <%= module %> do
   The function receives a topic and map of presences and must return a
   map of data matching the Presence data structure:
 
-      %{"123" => %{metas: [%{status: "away", bureaucrat_ref: ...}],
-        "456" => %{metas: [%{status: "online", bureaucrat_ref: ...}]}
+      %{"123" => %{metas: [%{status: "away", mandarin_ref: ...}],
+        "456" => %{metas: [%{status: "online", mandarin_ref: ...}]}
 
   The `:metas` key must be kept, but you can extend the map of information
   to include any additional information. For example:
@@ -68,6 +68,6 @@ defmodule <%= module %> do
   information, while maintaining the required `:metas` field from the
   original presence data.
   """
-  use Bureaucrat.Presence, otp_app: <%= inspect otp_app %>,
+  use Mandarin.Presence, otp_app: <%= inspect otp_app %>,
                         pubsub_server: <%= inspect binding()[:pubsub_server] %>
 end

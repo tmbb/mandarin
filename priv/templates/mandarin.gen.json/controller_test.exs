@@ -32,7 +32,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, id)
       assert json_response(conn, 200)["data"] == %{
         "id" => id<%= for {key, val} <- schema.params.create do %>,
-        "<%= key %>" => <%= Bureaucrat.json_library().encode!(val) %><% end %>}
+        "<%= key %>" => <%= Mandarin.json_library().encode!(val) %><% end %>}
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -51,7 +51,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, id)
       assert json_response(conn, 200)["data"] == %{
         "id" => id<%= for {key, val} <- schema.params.update do %>,
-        "<%= key %>" => <%= Bureaucrat.json_library().encode!(val) %><% end %>}
+        "<%= key %>" => <%= Mandarin.json_library().encode!(val) %><% end %>}
     end
 
     test "renders errors when data is invalid", %{conn: conn, <%= schema.singular %>: <%= schema.singular %>} do

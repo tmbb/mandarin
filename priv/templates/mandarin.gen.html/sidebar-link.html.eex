@@ -1,6 +1,6 @@
 
   <%%# Sidebar links for <%= schema.human_singular %> %>
-  <li class="treeview<%%= if @bureaucrat_resource == :<%= schema.singular %> do %> active menu-open<%% end %>">
+  <li class="treeview<%%= if @mandarin_resource == :<%= schema.singular %> do %> active menu-open<%% end %>">
     <a href="#">
       <i class="fa fa-th"></i> <span><%= schema.human_singular %></span>
     </a>

@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Bureaucrat.Install do
+defmodule Mix.Tasks.Mandarin.Install do
   @shortdoc "Generates controller, views, and context for an HTML resource"
 
   @moduledoc """
@@ -8,7 +8,7 @@ defmodule Mix.Tasks.Bureaucrat.Install do
 
   require EEx
 
-  alias Mix.Bureaucrat.Install
+  alias Mix.Mandarin.Install
 
   @switches [web: :string]
 
@@ -18,10 +18,10 @@ defmodule Mix.Tasks.Bureaucrat.Install do
     context_camel_case =
       case args do
         [arg] -> arg
-        _ -> Mix.raise(~s'mix bureaucrat.install requires a context name (i.e. "Admin")')
+        _ -> Mix.raise(~s'mix mandarin.install requires a context name (i.e. "Admin")')
       end
 
-    context_app = Mix.Bureaucrat.context_app()
+    context_app = Mix.Mandarin.context_app()
     context_app_camelcase = context_app |> to_string() |> Macro.camelize()
     context_underscore = Macro.underscore(context_camel_case)
     web_module = "#{context_app_camelcase}Web"
@@ -47,12 +47,12 @@ defmodule Mix.Tasks.Bureaucrat.Install do
   @doc false
   def run(args) do
     if Mix.Project.umbrella?() do
-      Mix.raise("mix bureaucrat.install can only be run inside an application directory")
+      Mix.raise("mix mandarin.install can only be run inside an application directory")
     end
 
-    context_app = Mix.Bureaucrat.context_app()
-    web_prefix = Mix.Bureaucrat.web_path(context_app)
-    _test_prefix = Mix.Bureaucrat.web_test_path(context_app)
+    context_app = Mix.Mandarin.context_app()
+    web_prefix = Mix.Mandarin.web_path(context_app)
+    _test_prefix = Mix.Mandarin.web_test_path(context_app)
 
     install = build(args, web_prefix)
 
@@ -85,43 +85,43 @@ defmodule Mix.Tasks.Bureaucrat.Install do
     nil
   end
 
-  # These paths are relative to the bureaucrat project (because they are used at compile time)
-  @external_resource "priv/templates/bureaucrat.install/layout.html.eex"
-  @external_resource "priv/templates/bureaucrat.install/main-header.html.eex"
-  @external_resource "priv/templates/bureaucrat.install/sidebar.html.eex"
-  @external_resource "priv/templates/bureaucrat.install/layout_view.ex"
+  # These paths are relative to the mandarin project (because they are used at compile time)
+  @external_resource "priv/templates/mandarin.install/layout.html.eex"
+  @external_resource "priv/templates/mandarin.install/main-header.html.eex"
+  @external_resource "priv/templates/mandarin.install/sidebar.html.eex"
+  @external_resource "priv/templates/mandarin.install/layout_view.ex"
 
   EEx.function_from_file(
     :defp,
     :layout_html,
-    "priv/templates/bureaucrat.install/layout.html.eex",
+    "priv/templates/mandarin.install/layout.html.eex",
     [:install]
   )
 
   EEx.function_from_file(
     :defp,
     :main_header_html,
-    "priv/templates/bureaucrat.install/main-header.html.eex",
+    "priv/templates/mandarin.install/main-header.html.eex",
     [:_install]
   )
 
   EEx.function_from_file(
     :defp,
     :sidebar_html,
-    "priv/templates/bureaucrat.install/sidebar.html.eex",
+    "priv/templates/mandarin.install/sidebar.html.eex",
     [:_install]
   )
 
   EEx.function_from_file(
     :defp,
     :layout_view,
-    "priv/templates/bureaucrat.install/layout_view.ex",
+    "priv/templates/mandarin.install/layout_view.ex",
     [:install]
   )
 
   @doc false
   def print_shell_instructions(%Install{} = install) do
-    app = Mix.Bureaucrat.context_app()
+    app = Mix.Mandarin.context_app()
 
     %Install{
       context_camel_case: context_camel_case,
@@ -149,9 +149,9 @@ defmodule Mix.Tasks.Bureaucrat.Install do
           - template for the sidebar in the admin pages
 
     Now, you must customize your router, so that your pages can make use of the new layout.
-    Require Bureaucrat.Router in your router in #{web_path}/router.ex:
+    Require Mandarin.Router in your router in #{web_path}/router.ex:
 
-        require Bureaucrat.Router
+        require Mandarin.Router
 
     Add a new pipeline to your router in #{web_path}/router.ex:
 

@@ -6,7 +6,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
   alias ForageWeb.ForageController
 
   # Adds the the resource type to the conn
-  plug Bureaucrat.Plugs.Resource, :<%= schema.singular %>
+  plug Mandarin.Plugs.Resource, :<%= schema.singular %>
 
   def index(conn, params) do
     <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)

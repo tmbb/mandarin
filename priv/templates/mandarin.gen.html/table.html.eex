@@ -1,8 +1,8 @@
 <table class="table">
   <thead>
     <tr>
-<%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}]   do %>      <th><%%= <%= context.basename %>_<%= schema.singular %>_sort_link(@conn, :<%= k %>, <%= k |> to_string() |> Bureaucrat.Naming.humanize() |> inspect() %>) %></th>
-<% end %><%= for {k, _, _, _} <- schema.assocs do %>      <th><%= k |> to_string() |> Bureaucrat.Naming.humanize() %></th>
+<%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}]   do %>      <th><%%= <%= context.basename %>_<%= schema.singular %>_sort_link(@conn, :<%= k %>, <%= k |> to_string() |> Mandarin.Naming.humanize() |> inspect() %>) %></th>
+<% end %><%= for {k, _, _, _} <- schema.assocs do %>      <th><%= k |> to_string() |> Mandarin.Naming.humanize() %></th>
 <% end %>
       <th></th>
     </tr>

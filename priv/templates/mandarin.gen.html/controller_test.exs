@@ -60,7 +60,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect context.name %>.<%= insp
       assert redirected_to(conn) == Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, <%= schema.singular %>)
 
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, <%= schema.singular %>)<%= if schema.string_attr do %>
-      assert html_response(conn, 200) =~ <%= inspect Mix.Bureaucrat.Schema.default_param(schema, :update) %><% else %>
+      assert html_response(conn, 200) =~ <%= inspect Mix.Mandarin.Schema.default_param(schema, :update) %><% else %>
       assert html_response(conn, 200)<% end %>
     end
 

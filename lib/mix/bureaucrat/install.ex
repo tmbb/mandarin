@@ -1,4 +1,4 @@
-defmodule Mix.Bureaucrat.Install do
+defmodule Mix.Mandarin.Install do
   defstruct [
     :context_underscore,
     :context_camel_case,

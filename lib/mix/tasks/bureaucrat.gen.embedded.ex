@@ -1,10 +1,10 @@
-defmodule Mix.Tasks.Bureaucrat.Gen.Embedded do
+defmodule Mix.Tasks.Mandarin.Gen.Embedded do
   @shortdoc "Generates an embedded Ecto schema file"
 
   @moduledoc """
   Generates an embedded Ecto schema for casting/validating data outside the DB.
 
-      mix bureaucrat.gen.embedded Blog.Post title:string views:integer
+      mix mandarin.gen.embedded Blog.Post title:string views:integer
 
   The first argument is the schema module followed by the schema attributes.
 
@@ -18,28 +18,28 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Embedded do
   where type are the types supported by Ecto. Omitting
   the type makes it default to `:string`:
 
-      mix bureaucrat.gen.embedded Blog.Post title views:integer
+      mix mandarin.gen.embedded Blog.Post title views:integer
 
   The following types are supported:
 
-  #{for attr <- Mix.Bureaucrat.Schema.valid_types(), do: "  * `#{inspect attr}`\n"}
+  #{for attr <- Mix.Mandarin.Schema.valid_types(), do: "  * `#{inspect(attr)}`\n"}
     * `:datetime` - An alias for `:naive_datetime`
   """
   use Mix.Task
 
-  alias Mix.Bureaucrat.Schema
+  alias Mix.Mandarin.Schema
 
   @switches [binary_id: :boolean, web: :string]
 
   @doc false
   def run(args) do
     if Mix.Project.umbrella?() do
-      Mix.raise "mix bureaucrat.gen.embedded can only be run inside an application directory"
+      Mix.raise("mix mandarin.gen.embedded can only be run inside an application directory")
     end
 
     schema = build(args)
 
-    paths = Mix.Bureaucrat.generator_paths()
+    paths = Mix.Mandarin.generator_paths()
 
     prompt_for_conflicts(schema)
 
@@ -50,6 +50,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Embedded do
   def build(args) do
     {schema_opts, parsed, _} = OptionParser.parse(args, switches: @switches)
     [schema_name | attrs] = validate_args!(parsed)
+
     opts =
       schema_opts
       |> Keyword.put(:embedded, true)
@@ -64,33 +65,36 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Embedded do
   def validate_args!([schema | _] = args) do
     cond do
       not Schema.valid?(schema) ->
-        raise_with_help "Expected the schema argument, #{inspect schema}, to be a valid module name"
+        raise_with_help(
+          "Expected the schema argument, #{inspect(schema)}, to be a valid module name"
+        )
+
       true ->
         args
     end
   end
+
   def validate_args!(_) do
-    raise_with_help "Invalid arguments"
+    raise_with_help("Invalid arguments")
   end
 
   @doc false
-  @spec raise_with_help(String.t) :: no_return()
+  @spec raise_with_help(String.t()) :: no_return()
   def raise_with_help(msg) do
-    Mix.raise """
+    Mix.raise("""
     #{msg}
 
-    mix bureaucrat.gen.embedded expects a module name followed by
+    mix mandarin.gen.embedded expects a module name followed by
     any number of attributes:
 
-        mix bureaucrat.gen.embedded Blog.Post title:string
-    """
+        mix mandarin.gen.embedded Blog.Post title:string
+    """)
   end
-
 
   defp prompt_for_conflicts(schema) do
     schema
     |> files_to_be_generated()
-    |> Mix.Bureaucrat.prompt_for_conflicts()
+    |> Mix.Mandarin.prompt_for_conflicts()
   end
 
   @doc false
@@ -101,7 +105,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Embedded do
   @doc false
   def copy_new_files(%Schema{} = schema, paths, binding) do
     files = files_to_be_generated(schema)
-    Mix.Bureaucrat.copy_from(paths, "priv/templates/bureaucrat.gen.embedded", binding, files)
+    Mix.Mandarin.copy_from(paths, "priv/templates/mandarin.gen.embedded", binding, files)
 
     schema
   end

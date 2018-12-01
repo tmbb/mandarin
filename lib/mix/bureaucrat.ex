@@ -1,5 +1,5 @@
-defmodule Mix.Bureaucrat do
-  # Conveniences for Bureaucrat tasks.
+defmodule Mix.Mandarin do
+  # Conveniences for Mandarin tasks.
   @moduledoc false
 
   @doc """
@@ -37,8 +37,12 @@ defmodule Mix.Bureaucrat do
         end) || raise "could not find #{source_file_path} in any of the sources"
 
       case format do
-        :text -> Mix.Generator.create_file(target, File.read!(source))
-        :eex  -> Mix.Generator.create_file(target, EEx.eval_file(source, binding))
+        :text ->
+          Mix.Generator.create_file(target, File.read!(source))
+
+        :eex ->
+          Mix.Generator.create_file(target, EEx.eval_file(source, binding))
+
         :new_eex ->
           if File.exists?(target) do
             :ok
@@ -51,6 +55,7 @@ defmodule Mix.Bureaucrat do
 
   defp to_app_source(path, source_dir) when is_binary(path),
     do: Path.join(path, source_dir)
+
   defp to_app_source(app, source_dir) when is_atom(app),
     do: Application.app_dir(app, source_dir)
 
@@ -59,55 +64,57 @@ defmodule Mix.Bureaucrat do
 
   ## Examples
 
-      iex> Mix.Bureaucrat.inflect("user")
+      iex> Mix.Mandarin.inflect("user")
       [alias: "User",
        human: "User",
-       base: "Bureaucrat",
-       web_module: "BureaucratWeb",
-       module: "Bureaucrat.User",
+       base: "Mandarin",
+       web_module: "MandarinWeb",
+       module: "Mandarin.User",
        scoped: "User",
        singular: "user",
        path: "user"]
 
-      iex> Mix.Bureaucrat.inflect("Admin.User")
+      iex> Mix.Mandarin.inflect("Admin.User")
       [alias: "User",
        human: "User",
-       base: "Bureaucrat",
-       web_module: "BureaucratWeb",
-       module: "Bureaucrat.Admin.User",
+       base: "Mandarin",
+       web_module: "MandarinWeb",
+       module: "Mandarin.Admin.User",
        scoped: "Admin.User",
        singular: "user",
        path: "admin/user"]
 
-      iex> Mix.Bureaucrat.inflect("Admin.SuperUser")
+      iex> Mix.Mandarin.inflect("Admin.SuperUser")
       [alias: "SuperUser",
        human: "Super user",
-       base: "Bureaucrat",
-       web_module: "BureaucratWeb",
-       module: "Bureaucrat.Admin.SuperUser",
+       base: "Mandarin",
+       web_module: "MandarinWeb",
+       module: "Mandarin.Admin.SuperUser",
        scoped: "Admin.SuperUser",
        singular: "super_user",
        path: "admin/super_user"]
 
   """
   def inflect(singular) do
-    base       = Mix.Bureaucrat.base
+    base = Mix.Mandarin.base()
     web_module = base |> web_module() |> inspect()
-    scoped     = Bureaucrat.Naming.camelize(singular)
-    path       = Bureaucrat.Naming.underscore(scoped)
-    singular   = String.split(path, "/") |> List.last
-    module     = Module.concat(base, scoped) |> inspect
-    alias      = String.split(module, ".") |> List.last
-    human      = Bureaucrat.Naming.humanize(singular)
+    scoped = Mandarin.Naming.camelize(singular)
+    path = Mandarin.Naming.underscore(scoped)
+    singular = String.split(path, "/") |> List.last()
+    module = Module.concat(base, scoped) |> inspect
+    alias = String.split(module, ".") |> List.last()
+    human = Mandarin.Naming.humanize(singular)
 
-    [alias: alias,
-     human: human,
-     base: base,
-     web_module: web_module,
-     module: module,
-     scoped: scoped,
-     singular: singular,
-     path: path]
+    [
+      alias: alias,
+      human: human,
+      base: base,
+      web_module: web_module,
+      module: module,
+      scoped: scoped,
+      singular: singular,
+      path: path
+    ]
   end
 
   @doc """
@@ -115,8 +122,9 @@ defmodule Mix.Bureaucrat do
   """
   def check_module_name_availability!(name) do
     name = Module.concat(Elixir, name)
+
     if Code.ensure_loaded?(name) do
-      Mix.raise "Module name #{inspect name} is already taken, please choose another name"
+      Mix.raise("Module name #{inspect(name)} is already taken, please choose another name")
     end
   end
 
@@ -144,8 +152,8 @@ defmodule Mix.Bureaucrat do
 
   defp app_base(app) do
     case Application.get_env(app, :namespace, app) do
-      ^app -> app |> to_string |> Bureaucrat.Naming.camelize()
-      mod  -> mod |> inspect()
+      ^app -> app |> to_string |> Mandarin.Naming.camelize()
+      mod -> mod |> inspect()
     end
   end
 
@@ -153,16 +161,16 @@ defmodule Mix.Bureaucrat do
   Returns the OTP app from the Mix project configuration.
   """
   def otp_app do
-    Mix.Project.config |> Keyword.fetch!(:app)
+    Mix.Project.config() |> Keyword.fetch!(:app)
   end
 
   @doc """
   Returns all compiled modules in a project.
   """
   def modules do
-    Mix.Project.compile_path
+    Mix.Project.compile_path()
     |> Path.join("*.beam")
-    |> Path.wildcard
+    |> Path.wildcard()
     |> Enum.map(&beam_to_module/1)
   end
 
@@ -174,17 +182,17 @@ defmodule Mix.Bureaucrat do
   The paths to look for template files for generators.
 
   Defaults to checking the current app's `priv` directory,
-  and falls back to Bureaucrat's `priv` directory.
+  and falls back to Mandarin's `priv` directory.
   """
   def generator_paths do
-    [".", :bureaucrat]
+    [".", :mandarin]
   end
 
   @doc """
   Checks if the given `app_path` is inside an umbrella.
   """
   def in_umbrella?(app_path) do
-    umbrella = Path.expand(Path.join [app_path, "..", ".."])
+    umbrella = Path.expand(Path.join([app_path, "..", ".."]))
     mix_path = Path.join(umbrella, "mix.exs")
     apps_path = Path.join(umbrella, "apps")
     File.exists?(mix_path) && File.exists?(apps_path)
@@ -217,6 +225,7 @@ defmodule Mix.Bureaucrat do
           {^ctx_app, path} -> Path.relative_to_cwd(path)
           _ -> mix_app_path(ctx_app, this_app)
         end
+
       Path.join(app_path, rel_path)
     end
   end
@@ -264,8 +273,9 @@ defmodule Mix.Bureaucrat do
     case Application.get_env(this_otp_app, :generators)[:context_app] do
       nil ->
         :error
+
       false ->
-        Mix.raise """
+        Mix.raise("""
         no context_app configured for current application #{this_otp_app}.
 
         Add the context_app generators config in config.exs, or pass the
@@ -278,13 +288,15 @@ defmodule Mix.Bureaucrat do
 
         via cli option:
 
-            mix bureaucrat.gen.[task] --context-app some_app
+            mix mandarin.gen.[task] --context-app some_app
 
         Note: cli option only works when `context_app` is not set to `false`
         in the config.
-        """
+        """)
+
       {app, _path} ->
         {:ok, app}
+
       app ->
         {:ok, app}
     end
@@ -294,11 +306,12 @@ defmodule Mix.Bureaucrat do
     case Mix.Project.deps_paths() do
       %{^app => path} ->
         Path.relative_to_cwd(path)
-      deps ->
-        Mix.raise """
-        no directory for context_app #{inspect app} found in #{this_otp_app}'s deps.
 
-        Ensure you have listed #{inspect app} as an in_umbrella dependency in mix.exs:
+      deps ->
+        Mix.raise("""
+        no directory for context_app #{inspect(app)} found in #{this_otp_app}'s deps.
+
+        Ensure you have listed #{inspect(app)} as an in_umbrella dependency in mix.exs:
 
             def deps do
               [
@@ -309,9 +322,9 @@ defmodule Mix.Bureaucrat do
 
         Existing deps:
 
-            #{inspect Map.keys(deps)}
+            #{inspect(Map.keys(deps))}
 
-        """
+        """)
     end
   end
 
@@ -322,16 +335,19 @@ defmodule Mix.Bureaucrat do
     file_paths = Enum.map(generator_files, fn {_, _, path} -> path end)
 
     case Enum.filter(file_paths, &File.exists?(&1)) do
-      [] -> :ok
+      [] ->
+        :ok
+
       conflicts ->
-        Mix.shell.info"""
+        Mix.shell().info("""
         The following files conflict with new files to be generated:
 
         #{conflicts |> Enum.map(&"  * #{&1}") |> Enum.join("\n")}
 
         See the --web option to namespace similarly named resources
-        """
-        unless Mix.shell.yes?("Proceed with interactive overwrite?") do
+        """)
+
+        unless Mix.shell().yes?("Proceed with interactive overwrite?") do
           System.halt()
         end
     end

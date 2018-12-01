@@ -1,10 +1,10 @@
-defmodule Mix.Tasks.Bureaucrat.Gen.Html do
+defmodule Mix.Tasks.Mandarin.Gen.Html do
   @shortdoc "Generates controller, views, and context for an HTML resource"
 
   @moduledoc """
   Generates controller, views, and context for an HTML resource.
 
-      mix bureaucrat.gen.html Accounts User users name:string age:integer
+      mix mandarin.gen.html Accounts User users name:string age:integer
 
   The first argument is the context module followed by the schema module
   and its plural name (used as the schema table name).
@@ -33,7 +33,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
 
   The location of the web files (controllers, views, templates, etc) in an
   umbrella application will vary based on the `:context_app` config located
-  in your applications `:generators` configuration. When set, the Bureaucrat
+  in your applications `:generators` configuration. When set, the Mandarin
   generators will generate web files directly in your lib and test folders
   since the application is assumed to be isolated to web specific functionality.
   If `:context_app` is not set, the generators will place web related lib
@@ -45,7 +45,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
 
   Alternatively, the `--context-app` option may be supplied to the generator:
 
-      mix bureaucrat.gen.html Sales User users --context-app warehouse
+      mix mandarin.gen.html Sales User users --context-app warehouse
 
   ## Web namespace
 
@@ -53,7 +53,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   You can customize the web module namespace by passing the `--web` flag with a
   module name, for example:
 
-      mix bureaucrat.gen.html Sales User users --web Sales
+      mix mandarin.gen.html Sales User users --web Sales
 
   Which would generate a `lib/app_web/controllers/sales/user_controller.ex` and
   `lib/app_web/views/sales/user_view.ex`.
@@ -71,7 +71,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   the plural name provided for the resource. To customize this value,
   a `--table` option may be provided. For example:
 
-      mix bureaucrat.gen.html Accounts User users --table cms_users
+      mix mandarin.gen.html Accounts User users --table cms_users
 
   ## binary_id
 
@@ -92,19 +92,19 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   switches, e.g. `--no-binary-id` to use normal ids despite the default
   configuration or `--migration` to force generation of the migration.
 
-  Read the documentation for `bureaucrat.gen.schema` for more information on
+  Read the documentation for `mandarin.gen.schema` for more information on
   attributes.
   """
   use Mix.Task
 
-  alias Mix.Bureaucrat.Context
-  alias Mix.Tasks.Bureaucrat.Gen
+  alias Mix.Mandarin.Context
+  alias Mix.Tasks.Mandarin.Gen
   require EEx
 
   @doc false
   def run(args) do
     if Mix.Project.umbrella?() do
-      Mix.raise("mix bureaucrat.gen.html can only be run inside an application directory")
+      Mix.raise("mix mandarin.gen.html can only be run inside an application directory")
     end
 
     {context, schema} = Gen.Context.build(args)
@@ -117,7 +117,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
       filters: filters(context)
     ]
 
-    paths = Mix.Bureaucrat.generator_paths()
+    paths = Mix.Mandarin.generator_paths()
 
     prompt_for_conflicts(context)
 
@@ -149,12 +149,12 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   EEx.function_from_file(
     :defp,
     :sidebar_link,
-    "priv/templates/bureaucrat.gen.html/sidebar-link.html.eex",
+    "priv/templates/mandarin.gen.html/sidebar-link.html.eex",
     [:schema]
   )
 
   defp add_links_to_sidebar(%Context{schema: schema, context_app: context_app} = context) do
-    web_prefix = Mix.Bureaucrat.web_path(context_app)
+    web_prefix = Mix.Mandarin.web_path(context_app)
 
     sidebar_template_path =
       Path.join([web_prefix, "templates", "#{context.basename}_layout", "sidebar.html.eex"])
@@ -170,7 +170,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
     context
     |> files_to_be_generated()
     |> Kernel.++(context_files(context))
-    |> Mix.Bureaucrat.prompt_for_conflicts()
+    |> Mix.Mandarin.prompt_for_conflicts()
   end
 
   defp context_files(%Context{generate?: true} = context) do
@@ -183,8 +183,8 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
 
   @doc false
   def files_to_be_generated(%Context{schema: schema, context_app: context_app} = context) do
-    web_prefix = Mix.Bureaucrat.web_path(context_app)
-    test_prefix = Mix.Bureaucrat.web_test_path(context_app)
+    web_prefix = Mix.Mandarin.web_path(context_app)
+    test_prefix = Mix.Mandarin.web_test_path(context_app)
     web_path = to_string(schema.web_path)
     ctx_basename = context.basename
 
@@ -276,7 +276,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   @doc false
   def copy_new_files(%Context{} = context, paths, binding) do
     files = files_to_be_generated(context)
-    Mix.Bureaucrat.copy_from(paths, "priv/templates/bureaucrat.gen.html", binding, files)
+    Mix.Mandarin.copy_from(paths, "priv/templates/mandarin.gen.html", binding, files)
     if context.generate?, do: Gen.Context.copy_new_files(context, paths, binding)
     context
   end
@@ -285,7 +285,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
   def print_shell_instructions(%Context{schema: schema, context_app: ctx_app} = context) do
     # if schema.web_namespace do
 
-    ctx_web_path = Mix.Bureaucrat.web_path(ctx_app)
+    ctx_web_path = Mix.Mandarin.web_path(ctx_app)
     scope = Module.concat(context.web_module, context.alias)
 
     Mix.shell().info("""
@@ -302,9 +302,9 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Html do
     # else
     #   Mix.shell().info("""
 
-    #   Add the resource to your browser scope in #{Mix.Bureaucrat.web_path(ctx_app)}/router.ex:
+    #   Add the resource to your browser scope in #{Mix.Mandarin.web_path(ctx_app)}/router.ex:
 
-    #       Bureaucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+    #       Mandarin.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
     #   """)
     # end
 

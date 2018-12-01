@@ -15,12 +15,12 @@
       <ul>
       <%= for {k, _} <- schema.attrs do %>
         <li>
-          <strong><%= Bureaucrat.Naming.humanize(Atom.to_string(k)) %>:</strong>
+          <strong><%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:</strong>
           <%%= @<%= schema.singular %>.<%= k %> %>
         </li>
       <% end %><%= for {k, _, full_module_name, _} <- schema.assocs do %>
         <li>
-          <strong><%= Bureaucrat.Naming.humanize(Atom.to_string(k)) %>:</strong><% module_alias = full_module_name |> String.split(".") |> Enum.at(-1) %>
+          <strong><%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:</strong><% module_alias = full_module_name |> String.split(".") |> Enum.at(-1) %>
           <%%= <%= module_alias %>.display(@<%= schema.singular %>.<%= k %>) %>
         </li>
       <% end %>

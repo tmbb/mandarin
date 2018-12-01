@@ -1,10 +1,10 @@
-defmodule Mix.Tasks.Bureaucrat.Gen.Context do
+defmodule Mix.Tasks.Mandarin.Gen.Context do
   @shortdoc "Generates a context with functions around an Ecto schema"
 
   @moduledoc """
   Generates a context with functions around an Ecto schema.
 
-      mix bureaucrat.gen.context Accounts User users name:string age:integer
+      mix mandarin.gen.context Accounts User users name:string age:integer
 
   The first argument is the context module followed by the schema module
   and its plural name (used as the schema table name).
@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
   the plural name provided for the resource. To customize this value,
   a `--table` option may be provided. For example:
 
-      mix bureaucrat.gen.context Accounts User users --table cms_users
+      mix mandarin.gen.context Accounts User users --table cms_users
 
   ## binary_id
 
@@ -61,29 +61,35 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
   switches, e.g. `--no-binary-id` to use normal ids despite the default
   configuration or `--migration` to force generation of the migration.
 
-  Read the documentation for `bureaucrat.gen.schema` for more information on
+  Read the documentation for `mandarin.gen.schema` for more information on
   attributes.
   """
 
   use Mix.Task
 
-  alias Mix.Bureaucrat.{Context, Schema}
-  alias Mix.Tasks.Bureaucrat.Gen
+  alias Mix.Mandarin.{Context, Schema}
+  alias Mix.Tasks.Mandarin.Gen
 
-  @switches [binary_id: :boolean, table: :string, web: :string,
-             schema: :boolean, context: :boolean, context_app: :string]
+  @switches [
+    binary_id: :boolean,
+    table: :string,
+    web: :string,
+    schema: :boolean,
+    context: :boolean,
+    context_app: :string
+  ]
 
   @default_opts [schema: true, context: true]
 
   @doc false
   def run(args) do
-    if Mix.Project.umbrella? do
-      Mix.raise "mix bureaucrat.gen.context can only be run inside an application directory"
+    if Mix.Project.umbrella?() do
+      Mix.raise("mix mandarin.gen.context can only be run inside an application directory")
     end
 
     {context, schema} = build(args)
     binding = [context: context, schema: schema]
-    paths = Mix.Bureaucrat.generator_paths()
+    paths = Mix.Mandarin.generator_paths()
 
     prompt_for_conflicts(context)
     prompt_for_code_injection(context)
@@ -96,7 +102,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
   defp prompt_for_conflicts(context) do
     context
     |> files_to_be_generated()
-    |> Mix.Bureaucrat.prompt_for_conflicts()
+    |> Mix.Mandarin.prompt_for_conflicts()
   end
 
   @doc false
@@ -111,6 +117,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
 
   defp parse_opts(args) do
     {opts, parsed, invalid} = OptionParser.parse(args, switches: @switches)
+
     merged_opts =
       @default_opts
       |> Keyword.merge(opts)
@@ -118,7 +125,9 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
 
     {merged_opts, parsed, invalid}
   end
+
   defp put_context_app(opts, nil), do: opts
+
   defp put_context_app(opts, string) do
     Keyword.put(opts, :context_app, String.to_atom(string))
   end
@@ -143,11 +152,17 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
 
   defp inject_schema_access(%Context{file: file} = context, paths, binding) do
     unless Context.pre_existing?(context) do
-      Mix.Generator.create_file(file, Mix.Bureaucrat.eval_from(paths, "priv/templates/bureaucrat.gen.context/context.ex", binding))
+      Mix.Generator.create_file(
+        file,
+        Mix.Mandarin.eval_from(paths, "priv/templates/mandarin.gen.context/context.ex", binding)
+      )
     end
 
     paths
-    |> Mix.Bureaucrat.eval_from("priv/templates/bureaucrat.gen.context/#{schema_access_template(context)}", binding)
+    |> Mix.Mandarin.eval_from(
+      "priv/templates/mandarin.gen.context/#{schema_access_template(context)}",
+      binding
+    )
     |> inject_eex_before_final_end(file, binding)
   end
 
@@ -157,11 +172,18 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
 
   defp inject_tests(%Context{test_file: test_file} = context, paths, binding) do
     unless Context.pre_existing_tests?(context) do
-      Mix.Generator.create_file(test_file, Mix.Bureaucrat.eval_from(paths, "priv/templates/bureaucrat.gen.context/context_test.exs", binding))
+      Mix.Generator.create_file(
+        test_file,
+        Mix.Mandarin.eval_from(
+          paths,
+          "priv/templates/mandarin.gen.context/context_test.exs",
+          binding
+        )
+      )
     end
 
     paths
-    |> Mix.Bureaucrat.eval_from("priv/templates/bureaucrat.gen.context/test_cases.exs", binding)
+    |> Mix.Mandarin.eval_from("priv/templates/mandarin.gen.context/test_cases.exs", binding)
     |> inject_eex_before_final_end(test_file, binding)
   end
 
@@ -171,7 +193,7 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
     if String.contains?(file, content_to_inject) do
       :ok
     else
-      Mix.shell.info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
+      Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
 
       file
       |> String.trim_trailing()
@@ -203,39 +225,42 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
   defp validate_args!([context, schema, _plural | _] = args) do
     cond do
       not Context.valid?(context) ->
-        raise_with_help "Expected the context, #{inspect context}, to be a valid module name"
+        raise_with_help("Expected the context, #{inspect(context)}, to be a valid module name")
+
       not Schema.valid?(schema) ->
-        raise_with_help "Expected the schema, #{inspect schema}, to be a valid module name"
+        raise_with_help("Expected the schema, #{inspect(schema)}, to be a valid module name")
+
       context == schema ->
-        raise_with_help "The context and schema should have different names"
+        raise_with_help("The context and schema should have different names")
+
       true ->
         args
     end
   end
 
   defp validate_args!(_) do
-    raise_with_help "Invalid arguments"
+    raise_with_help("Invalid arguments")
   end
 
   @doc false
-  @spec raise_with_help(String.t) :: no_return()
+  @spec raise_with_help(String.t()) :: no_return()
   def raise_with_help(msg) do
-    Mix.raise """
+    Mix.raise("""
     #{msg}
 
-    mix bureaucrat.gen.html, bureaucrat.gen.json and bureaucrat.gen.context expect a
+    mix mandarin.gen.html, mandarin.gen.json and mandarin.gen.context expect a
     context module name, followed by singular and plural names of
     the generated resource, ending with any number of attributes.
     For example:
 
-        mix bureaucrat.gen.html Accounts User users name:string
-        mix bureaucrat.gen.json Accounts User users name:string
-        mix bureaucrat.gen.context Accounts User users name:string
+        mix mandarin.gen.html Accounts User users name:string
+        mix mandarin.gen.json Accounts User users name:string
+        mix mandarin.gen.context Accounts User users name:string
 
     The context serves as the API boundary for the given resource.
     Multiple resources may belong to a context and a resource may be
     split over distinct contexts (such as Accounts.User and Payments.User).
-    """
+    """)
   end
 
   def prompt_for_code_injection(%Context{} = context) do
@@ -243,9 +268,9 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
       function_count = Context.function_count(context)
       file_count = Context.file_count(context)
 
-      Mix.shell.info """
+      Mix.shell().info("""
       You are generating into an existing context.
-      The #{inspect context.module} context currently has #{function_count} functions and \
+      The #{inspect(context.module)} context currently has #{function_count} functions and \
       #{file_count} files in its directory.
 
         * It's OK to have multiple resources in the same context as \
@@ -253,8 +278,9 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Context do
         * If they are not closely related, another context probably works better
 
       If you are not sure, prefer creating a new context over adding to the existing one.
-      """
-      unless Mix.shell.yes?("Would you like to proceed?") do
+      """)
+
+      unless Mix.shell().yes?("Would you like to proceed?") do
         System.halt()
       end
     end

@@ -1,10 +1,10 @@
-defmodule Mix.Tasks.Bureaucrat.Gen.Channel do
-  @shortdoc "Generates a Bureaucrat channel"
+defmodule Mix.Tasks.Mandarin.Gen.Channel do
+  @shortdoc "Generates a Mandarin channel"
 
   @moduledoc """
-  Generates a Bureaucrat channel.
+  Generates a Mandarin channel.
 
-      mix bureaucrat.gen.channel Room
+      mix mandarin.gen.channel Room
 
   Accepts the module name for the channel
 
@@ -26,48 +26,51 @@ defmodule Mix.Tasks.Bureaucrat.Gen.Channel do
   @doc false
   def run(args) do
     if Mix.Project.umbrella?() do
-      Mix.raise "mix bureaucrat.gen.channel can only be run inside an application directory"
+      Mix.raise("mix mandarin.gen.channel can only be run inside an application directory")
     end
+
     [channel_name] = validate_args!(args)
-    context_app = Mix.Bureaucrat.context_app()
-    web_prefix = Mix.Bureaucrat.web_path(context_app)
-    test_prefix = Mix.Bureaucrat.web_test_path(context_app)
-    binding = Mix.Bureaucrat.inflect(channel_name)
+    context_app = Mix.Mandarin.context_app()
+    web_prefix = Mix.Mandarin.web_path(context_app)
+    test_prefix = Mix.Mandarin.web_test_path(context_app)
+    binding = Mix.Mandarin.inflect(channel_name)
     binding = Keyword.put(binding, :module, "#{binding[:web_module]}.#{binding[:scoped]}")
 
-    Mix.Bureaucrat.check_module_name_availability!(binding[:module] <> "Channel")
+    Mix.Mandarin.check_module_name_availability!(binding[:module] <> "Channel")
 
-    Mix.Bureaucrat.copy_from paths(), "priv/templates/bureaucrat.gen.channel", binding, [
-      {:eex, "channel.ex",       Path.join(web_prefix, "channels/#{binding[:path]}_channel.ex")},
-      {:eex, "channel_test.exs", Path.join(test_prefix, "channels/#{binding[:path]}_channel_test.exs")},
-    ]
+    Mix.Mandarin.copy_from(paths(), "priv/templates/mandarin.gen.channel", binding, [
+      {:eex, "channel.ex", Path.join(web_prefix, "channels/#{binding[:path]}_channel.ex")},
+      {:eex, "channel_test.exs",
+       Path.join(test_prefix, "channels/#{binding[:path]}_channel_test.exs")}
+    ])
 
-    Mix.shell.info """
+    Mix.shell().info("""
 
-    Add the channel to your `#{Mix.Bureaucrat.web_path(context_app, "channels/user_socket.ex")}` handler, for example:
+    Add the channel to your `#{Mix.Mandarin.web_path(context_app, "channels/user_socket.ex")}` handler, for example:
 
         channel "#{binding[:singular]}:lobby", #{binding[:module]}Channel
-    """
+    """)
   end
 
   @spec raise_with_help() :: no_return()
   defp raise_with_help do
-    Mix.raise """
-    mix bureaucrat.gen.channel expects just the module name:
+    Mix.raise("""
+    mix mandarin.gen.channel expects just the module name:
 
-        mix bureaucrat.gen.channel Room
+        mix mandarin.gen.channel Room
 
-    """
+    """)
   end
 
   defp validate_args!(args) do
     unless length(args) == 1 do
       raise_with_help()
     end
+
     args
   end
 
   defp paths do
-    [".", :bureaucrat]
+    [".", :mandarin]
   end
 end

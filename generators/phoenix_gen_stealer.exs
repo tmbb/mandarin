@@ -14,6 +14,7 @@ defmodule PhoenixGenStealer do
       if File.exists?(path) do
         File.rm_rf!(path)
       end
+
       File.mkdir_p!(path)
       result = fun.(path)
       File.rm_rf!(path)
@@ -35,6 +36,7 @@ defmodule PhoenixGenStealer do
       new_path = String.replace(path, old, new)
       File.rename(path, new_path)
     end
+
     rename_files(pattern, replacements)
   end
 
@@ -51,6 +53,7 @@ defmodule PhoenixGenStealer do
         File.write!(path, new_contents)
       end
     end
+
     replace_in_files(pattern, replacements)
   end
 
@@ -59,6 +62,7 @@ defmodule PhoenixGenStealer do
     uppercase = Keyword.get(opts, :uppercase, Macro.camelize(lowercase))
     short_lowercase = Keyword.get(opts, :short_lowercase, lowercase)
     short_uppercase = Keyword.get(opts, :short_lowercase, uppercase)
+
     replacements = [
       {"phoenix", lowercase},
       {"Phoenix", uppercase},
@@ -92,11 +96,11 @@ defmodule PhoenixGenStealer do
       # We use glob patterns instead of a file list
       # so that each file name can be processed multiple times
       for glob_pattern <- [
-        mix_dst <> "/**",
-        lib_your_app_dst <> "/**",
-        naming_dst <> "**/",
-        priv_templates_dst <> "/**"
-      ] do
+            mix_dst <> "/**",
+            lib_your_app_dst <> "/**",
+            naming_dst <> "**/",
+            priv_templates_dst <> "/**"
+          ] do
         rename_files(glob_pattern, replacements)
         replace_in_files(glob_pattern, replacements)
       end
@@ -106,4 +110,4 @@ defmodule PhoenixGenStealer do
   end
 end
 
-PhoenixGenStealer.steal(".", lowercase: "bureaucrat")
+PhoenixGenStealer.steal(".", lowercase: "mandarin")

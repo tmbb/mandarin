@@ -1,7 +1,7 @@
-defmodule Mix.Bureaucrat.Context do
+defmodule Mix.Mandarin.Context do
   @moduledoc false
 
-  alias Mix.Bureaucrat.{Context, Schema}
+  alias Mix.Mandarin.{Context, Schema}
 
   defstruct name: nil,
             module: nil,
@@ -22,15 +22,15 @@ defmodule Mix.Bureaucrat.Context do
   end
 
   def new(context_name, %Schema{} = schema, opts) do
-    ctx_app   = opts[:context_app] || Mix.Bureaucrat.context_app()
-    base      = Module.concat([Mix.Bureaucrat.context_base(ctx_app)])
-    module    = Module.concat(base, context_name)
-    alias     = Module.concat([module |> Module.split() |> List.last()])
-    basedir   = Bureaucrat.Naming.underscore(context_name)
-    basename  = Path.basename(basedir)
-    dir       = Mix.Bureaucrat.context_lib_path(ctx_app, basedir)
-    test_dir  = Mix.Bureaucrat.context_test_path(ctx_app, basedir)
-    file      = Path.join([dir, basename <> ".ex"])
+    ctx_app = opts[:context_app] || Mix.Mandarin.context_app()
+    base = Module.concat([Mix.Mandarin.context_base(ctx_app)])
+    module = Module.concat(base, context_name)
+    alias = Module.concat([module |> Module.split() |> List.last()])
+    basedir = Mandarin.Naming.underscore(context_name)
+    basename = Path.basename(basedir)
+    dir = Mix.Mandarin.context_lib_path(ctx_app, basedir)
+    test_dir = Mix.Mandarin.context_test_path(ctx_app, basedir)
+    file = Path.join([dir, basename <> ".ex"])
     test_file = Path.join([test_dir, basename <> "_test.exs"])
     generate? = Keyword.get(opts, :context, true)
 
@@ -47,7 +47,8 @@ defmodule Mix.Bureaucrat.Context do
       dir: dir,
       generate?: generate?,
       context_app: ctx_app,
-      opts: opts}
+      opts: opts
+    }
   end
 
   def pre_existing?(%Context{file: file}), do: File.exists?(file)
@@ -75,9 +76,10 @@ defmodule Mix.Bureaucrat.Context do
   end
 
   defp web_module do
-    base = Mix.Bureaucrat.base()
+    base = Mix.Mandarin.base()
+
     cond do
-      Mix.Bureaucrat.context_app() != Mix.Bureaucrat.otp_app() ->
+      Mix.Mandarin.context_app() != Mix.Mandarin.otp_app() ->
         Module.concat([base])
 
       String.ends_with?(base, "Web") ->
