@@ -11,9 +11,9 @@
 <%%= for <%= schema.singular %> <- @<%= schema.plural %>.entries do %>
     <tr>
 <%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}] do %>      <td><%%= <%= schema.singular %>.<%= k %> %></td>
-<% end %><%= for {k, _, full_module_name, _} <- schema.assocs do %><% module_alias = full_module_name |> String.split(".") |> Enum.at(-1) %>      <td>
+<% end %><%= for {k, _, _, _} <- schema.assocs do %>      <td>
         <a href="<%%= Routes.<%= context.basename %>_<%= k %>_path(@conn, :show, <%= schema.singular %>.<%= k %>.id) %>">
-          <%%= <%= schema.singular %>.<%= k %> && <%= module_alias %>.display(<%= schema.singular %>.<%= k %>) %>
+          <%%= forage_display(<%= schema.singular %>.<%= k %>) %>
         </a>
       </td>
 <% end %>

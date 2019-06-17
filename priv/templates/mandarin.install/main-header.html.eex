@@ -1,9 +1,9 @@
 <%# Logo %>
 <a href="#" class="logo">
   <%# mini logo for sidebar mini 50x50 pixels %>
-  <span class="logo-mini"><b>B</b>CT</span>
+  <span class="logo-mini"><b>M</b>rn</span>
   <%# logo for regular state and mobile devices %>
-  <span class="logo-lg"><b>BUREAU</b>CRAT</span>
+  <span class="logo-lg"><b>Mand</b>arin</span>
 </a>
 
 <%# Header Navbar %>

@@ -59,7 +59,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
     <%= schema.singular %> = <%= inspect context.alias %>.get_<%= schema.singular %>!(id)
     {:ok, _<%= schema.singular %>} = <%= inspect context.alias %>.delete_<%= schema.singular %>(<%= schema.singular %>)
     # After deleting, remain on the same page
-    redirect_params = Map.take(params, ["_pagination"])
+    redirect_params = ForageController.pagination_from_params(params)
 
     conn
     |> put_flash(:info, "<%= schema.human_singular %> deleted successfully.")
@@ -68,7 +68,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
 
   def select(conn, params) do
     <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)
-    data = ForageController.forage_select_data(<%= schema.plural %>, &<%= inspect(schema.alias) %>.display/1)
+    data = ForageController.forage_select_data(<%= schema.plural %>)
     json(conn, data)
   end
 end

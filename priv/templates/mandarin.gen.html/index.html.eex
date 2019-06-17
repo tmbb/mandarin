@@ -14,7 +14,7 @@
     <div class="box-body">
       <%%# Table %>
       <%%= render "table.html", assigns %>
-      <%%# Pagination (TODO: make it work) %>
+      <%%# Pagination %>
       <%%= <%= context.basename %>_<%= schema.singular %>_pagination_widget(@conn, @<%= schema.plural %>, previous: "« Previous", next: "Next »") %>
     </div>
 

@@ -18,10 +18,10 @@
           <strong><%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:</strong>
           <%%= @<%= schema.singular %>.<%= k %> %>
         </li>
-      <% end %><%= for {k, _, full_module_name, _} <- schema.assocs do %>
+      <% end %><%= for {k, _, _, _} <- schema.assocs do %>
         <li>
-          <strong><%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:</strong><% module_alias = full_module_name |> String.split(".") |> Enum.at(-1) %>
-          <%%= <%= module_alias %>.display(@<%= schema.singular %>.<%= k %>) %>
+          <strong><%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:</strong>
+          <%%= forage_display(@<%= schema.singular %>.<%= k %>) %>
         </li>
       <% end %>
       </ul>

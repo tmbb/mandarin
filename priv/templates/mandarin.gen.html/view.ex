@@ -3,6 +3,6 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
   alias <%= full_module_name %>
   <% end %>
   use ForageWeb.ForageView,
-    routes_module: <%= inspect context.web_module %>.Router.Helpers,
+    routes_module: Routes,
     prefix: :<%= context.basename %>_<%= schema.singular %>
 end
