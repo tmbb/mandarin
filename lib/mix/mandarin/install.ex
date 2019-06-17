@@ -1,6 +1,7 @@
 defmodule Mix.Mandarin.Install do
   @moduledoc false
   defstruct [
+    :app,
     :context_underscore,
     :context_camel_case,
     :web_module,

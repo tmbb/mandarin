@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Mandarin.Install do
 
   @switches [web: :string]
 
-  def build(args, web_path) do
+  def build(args, app, web_path) do
     {_optional, args, _} = OptionParser.parse(args, switches: @switches)
 
     context_camel_case =
@@ -29,6 +29,7 @@ defmodule Mix.Tasks.Mandarin.Install do
     layout_view_camel_case = Macro.camelize(layout_view_underscore)
 
     %Install{
+      app: app,
       context_camel_case: context_camel_case,
       web_module: web_module,
       context_underscore: context_underscore,
@@ -51,10 +52,11 @@ defmodule Mix.Tasks.Mandarin.Install do
     end
 
     context_app = Mix.Mandarin.context_app()
+    app = Atom.to_string(context_app)
     web_prefix = Mix.Mandarin.web_path(context_app)
     _test_prefix = Mix.Mandarin.web_test_path(context_app)
 
-    install = build(args, web_prefix)
+    install = build(args, app, web_prefix)
 
     layout_dir = "#{install.context_underscore}_layout"
 
@@ -69,6 +71,12 @@ defmodule Mix.Tasks.Mandarin.Install do
     layout_view_path =
       Path.join([web_prefix, "views", "#{install.context_underscore}_layout_view.ex"])
 
+    # Add the extra scope and pipeline to the Router
+    customize_router(install)
+
+    # Add pagination capabilities to the Repo
+    customize_repo(install)
+
     paths = [layout_html_path, main_header_html_path, sidebar_html_path, layout_view_path]
 
     prompt_for_conflicts(paths)
@@ -81,8 +89,60 @@ defmodule Mix.Tasks.Mandarin.Install do
     print_shell_instructions(install)
   end
 
+  # Injects code into the Router module to create custom pipelines and scopes
+  defp customize_router(install) do
+    router_path = Path.join([install.web_path, "router.ex"])
+
+    if File.exists?(router_path) do
+      pipeline_and_scope = new_pipeline_and_scope(install)
+      inject_eex_before_final_end(pipeline_and_scope, router_path)
+    else
+      Mix.shell().info("""
+      No "#{router_path}" file was found.
+      """)
+    end
+  end
+
+  # Injects code into the repo to make it capable of pagination
+  defp customize_repo(install) do
+    repo_path = Path.join(["lib", install.app, "repo.ex"])
+    repo_contents = File.read!(repo_path)
+
+    if File.exists?(repo_path) do
+      unless String.contains?(repo_contents, "\n  use Paginator") do
+        use_paginator = "\n  use Paginator\n"
+        inject_eex_before_final_end(use_paginator, repo_path)
+      end
+    else
+      Mix.shell().info("""
+      No "#{repo_path}" file was found.
+      """)
+    end
+  end
+
   defp prompt_for_conflicts(_paths) do
     nil
+  end
+
+  defp inject_eex_before_final_end(content_to_inject, file_path) do
+    file = File.read!(file_path)
+
+    if String.contains?(file, String.trim(content_to_inject)) do
+      :ok
+    else
+      Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
+
+      file
+      |> String.trim_trailing()
+      |> String.trim_trailing("end")
+      |> Kernel.<>(content_to_inject)
+      |> Kernel.<>("end\n")
+      |> write_file(file_path)
+    end
+  end
+
+  defp write_file(content, file) do
+    File.write!(file, content)
   end
 
   # These paths are relative to the mandarin project (because they are used at compile time)
@@ -119,10 +179,15 @@ defmodule Mix.Tasks.Mandarin.Install do
     [:install]
   )
 
+  EEx.function_from_file(
+    :defp,
+    :new_pipeline_and_scope,
+    "priv/templates/mandarin.install/router.ex",
+    [:install]
+  )
+
   @doc false
   def print_shell_instructions(%Install{} = install) do
-    app = Mix.Mandarin.context_app()
-
     %Install{
       context_camel_case: context_camel_case,
       context_underscore: ctx,
@@ -135,33 +200,30 @@ defmodule Mix.Tasks.Mandarin.Install do
     Mix.shell().info("""
     The following files have been generated:
 
-      * "#{app}/lib/#{web_path}/views/#{layout_view_underscore}.ex"
+      * "#{web_path}/views/#{layout_view_underscore}.ex"
           - the view for the admin controllers
 
-      * "#{app}/lib/#{web_path}/templates/#{layout_view_underscore}/layout.html.eex"
+      * "#{web_path}/templates/#{layout_view_underscore}/layout.html.eex"
           - the layout for the admin pages
 
-      * "#{app}/lib/#{web_path}/templates/#{layout_view_underscore}/sidebar-links.html.eex"
+      * "#{web_path}/templates/#{layout_view_underscore}/sidebar-links.html.eex"
           - the sidebar links for the admin pages;
             when a new resource is generated, a new link will be appended to this list
 
-      * "#{app}/lib/#{web_path}/templates/#{layout_view_underscore}/sidebar.html.eex"
+      * "#{web_path}/templates/#{layout_view_underscore}/sidebar.html.eex"
           - template for the sidebar in the admin pages
+
+    A new pipeline and a new scope have been injected in the "#{web_path}/router.ex" file.
+    Admin routes should be sent through this pipeline so that they use the right layout:
 
     Now, you must customize your router, so that your pages can make use of the new layout.
     Require Mandarin.Router in your router in #{web_path}/router.ex:
 
         require Mandarin.Router
 
-    Add a new pipeline to your router in #{web_path}/router.ex:
-
         pipeline :#{ctx}_layout do
           plug(:put_layout, {#{web_module}.#{layout_view_camel_case}, "layout.html"})
         end
-
-    The admin routes must be sent through this pipeline so that they use the right layout.
-
-    You should also add a new scope, under which you will add the routes:
 
         scope "/#{ctx}", #{web_module}.#{context_camel_case}, as: :#{ctx} do
           pipe_through([:browser, :#{ctx}_layout])

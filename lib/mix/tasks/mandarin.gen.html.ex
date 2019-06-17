@@ -303,7 +303,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         scope "/#{schema.web_path}", #{inspect(scope)}, as: :#{context.basename} do
           pipe_through([:browser, :#{context.basename}_layout])
           ...
-          Buraucrat.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+          Mandarin.Router.resources("/#{schema.plural}", #{inspect(schema.alias)}Controller)
         end
     """)
 

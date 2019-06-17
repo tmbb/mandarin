@@ -320,7 +320,7 @@ defmodule Mix.Mandarin.Schema do
   defp indexes(table, assocs, uniques) do
     uniques = Enum.map(uniques, fn key -> {key, true} end)
 
-    assocs = Enum.map(assocs, fn x = {_, key, _, _} -> {"#{key}_id", false} end)
+    assocs = Enum.map(assocs, fn {_, key, _, _} -> {"#{key}_id", false} end)
 
     (uniques ++ assocs)
     |> Enum.uniq_by(fn {key, _} -> key end)
