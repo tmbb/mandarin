@@ -1,0 +1,3 @@
+<section class="content-header">
+  <h1><%%= @context %> - Index page<h1>
+</section>

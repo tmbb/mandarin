@@ -71,6 +71,27 @@ defmodule Mix.Tasks.Mandarin.Install do
     layout_view_path =
       Path.join([web_prefix, "views", "#{install.context_underscore}_layout_view.ex"])
 
+    # Index page
+    index_template_path =
+      Path.join([
+        web_prefix,
+        "templates",
+        "#{install.context_underscore}",
+        "index",
+        "index.html.eex"
+      ])
+
+    index_controller_path =
+      Path.join([
+        web_prefix,
+        "controllers",
+        "#{install.context_underscore}",
+        "index_controller.ex"
+      ])
+
+    index_view_path =
+      Path.join([web_prefix, "views", "#{install.context_underscore}", "index_view.ex"])
+
     # Add the extra scope and pipeline to the Router
     customize_router(install)
 
@@ -85,6 +106,10 @@ defmodule Mix.Tasks.Mandarin.Install do
     write_p!(main_header_html_path, main_header_html(install))
     write_p!(sidebar_html_path, sidebar_html(install))
     write_p!(layout_view_path, layout_view(install))
+    # Index page
+    write_p!(index_template_path, index_template(install))
+    write_p!(index_controller_path, index_controller(install))
+    write_p!(index_view_path, index_view(install))
 
     print_shell_instructions(install)
   end
@@ -94,7 +119,12 @@ defmodule Mix.Tasks.Mandarin.Install do
     router_path = Path.join([install.web_path, "router.ex"])
 
     if File.exists?(router_path) do
-      pipeline_and_scope = new_pipeline_and_scope(install)
+      router_contents = File.read!(router_path)
+
+      requires_mandarin_router? =
+        String.match?(router_contents, ~r/\n\s*require\s+Mandarin.Router\s*\n/)
+
+      pipeline_and_scope = new_pipeline_and_scope(install, requires_mandarin_router?)
       inject_eex_before_final_end(pipeline_and_scope, router_path)
     else
       Mix.shell().info("""
@@ -150,6 +180,11 @@ defmodule Mix.Tasks.Mandarin.Install do
   @external_resource "priv/templates/mandarin.install/main-header.html.eex"
   @external_resource "priv/templates/mandarin.install/sidebar.html.eex"
   @external_resource "priv/templates/mandarin.install/layout_view.ex"
+  @external_resource "priv/templates/mandarin.install/router.ex"
+  # Index page (contains a template, a view and a controller)
+  @external_resource "priv/templates/mandarin.install/index.html.eex"
+  @external_resource "priv/templates/mandarin.install/index_view.ex"
+  @external_resource "priv/templates/mandarin.install/index_controller.ex"
 
   EEx.function_from_file(
     :defp,
@@ -183,6 +218,27 @@ defmodule Mix.Tasks.Mandarin.Install do
     :defp,
     :new_pipeline_and_scope,
     "priv/templates/mandarin.install/router.ex",
+    [:install, :requires_mandarin_router?]
+  )
+
+  EEx.function_from_file(
+    :defp,
+    :index_template,
+    "priv/templates/mandarin.install/index.html.eex",
+    [:_install]
+  )
+
+  EEx.function_from_file(
+    :defp,
+    :index_view,
+    "priv/templates/mandarin.install/index_view.ex",
+    [:install]
+  )
+
+  EEx.function_from_file(
+    :defp,
+    :index_controller,
+    "priv/templates/mandarin.install/index_controller.ex",
     [:install]
   )
 
@@ -213,11 +269,19 @@ defmodule Mix.Tasks.Mandarin.Install do
       * "#{web_path}/templates/#{layout_view_underscore}/sidebar.html.eex"
           - template for the sidebar in the admin pages
 
+      * "#{web_path}/templates/#{ctx}/index.html.eex"
+          - the template for the index page
+
+      * "#{web_path}/views/#{ctx}/sidebar.html.eex"
+          - the view for the index page
+
+      * "#{web_path}/controllers/#{ctx}/sidebar.html.eex"
+           - the controller for the index page
+
     A new pipeline and a new scope have been injected in the "#{web_path}/router.ex" file.
     Admin routes should be sent through this pipeline so that they use the right layout:
 
-    Now, you must customize your router, so that your pages can make use of the new layout.
-    Require Mandarin.Router in your router in #{web_path}/router.ex:
+    The folowing code has been injected into your router (#{web_path}/router.ex):
 
         require Mandarin.Router
 
@@ -228,7 +292,10 @@ defmodule Mix.Tasks.Mandarin.Install do
         scope "/#{ctx}", #{web_module}.#{context_camel_case}, as: :#{ctx} do
           pipe_through([:browser, :#{ctx}_layout])
           # Add routes here...
+          get "/", IndexController, :index
         end
+
+    When you create your resources, you must add the routes under the "/#{ctx}" scope.
     """)
   end
 end
