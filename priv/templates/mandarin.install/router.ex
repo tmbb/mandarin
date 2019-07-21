@@ -1,4 +1,4 @@
-<%= if requires_mandarin_router? do %>
+<%= unless requires_mandarin_router? do %>
   require Mandarin.Router
 <% end %>
   pipeline :<%= install.context_underscore %>_layout do
