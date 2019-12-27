@@ -7,7 +7,7 @@
     <ul class="treeview-menu">
       <li><%%= link(index_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :index)) %></li>
       <li><%%= link(new_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :new)) %></li>
-      <%%= if Map.get(assigns, :<%= schema.singular %>) && @<%= schema.singular %>.id do %>
+      <%%= if Map.has_key?(assigns, :<%= schema.singular %>) && Map.has_key?(@<%= schema.singular %>, :id) do %>
         <li><%%= link(edit_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :edit, @<%= schema.singular %>.id)) %></li>
         <li><%%= link(delete_label, to: Routes.admin_<%= schema.singular %>_path(@conn, :delete, @<%= schema.singular %>.id), method: :delete, data: [confirm: "Are you sure?"]) %></li>
       <%% end %>
