@@ -13,7 +13,7 @@
       [%<%= inspect schema.alias %>{}, ...]
 
   """
-  def list_<%= schema.plural %>(params) do<% [{default_sort_field, _type} | _attrs] = schema.attrs %>
+  def list_<%= schema.plural %>(params \\ %{}) do<% [{default_sort_field, _type} | _attrs] = schema.attrs %>
     Forage.paginate(params, <%= inspect schema.alias %>, Repo, sort: [:<%= default_sort_field %>, :id], preload: <%= inspect(preload) %>)
   end
 
