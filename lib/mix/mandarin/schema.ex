@@ -136,6 +136,26 @@ defmodule Mix.Mandarin.Schema do
   end
 
   @doc """
+  Get the default text ield for text search queries.
+  """
+  def default_search_field(%Schema{} = schema) do
+    case Enum.find(schema.attrs, fn {_field, type} -> type in [:string, :text] end) do
+      {field, _type} -> field
+      nil -> nil
+    end
+  end
+
+  @doc """
+  Get the default sort field for search queries (as a list witha single element)
+  """
+  def maybe_default_sort_field(%Schema{} = schema) do
+    case schema.attrs do
+      [{field, _type} | _attrs] -> [field]
+      _ -> []
+    end
+  end
+
+  @doc """
   Fetches the unique attributes from attrs.
   """
   def uniques(attrs) do

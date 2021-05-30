@@ -30,14 +30,15 @@ defmodule <%= inspect schema.module %> do<%
     |> cast_assoc(:<%= k %>)<% end %>
 <%= for k <- schema.uniques do %>    |> unique_constraint(<%= inspect k %>)
 <% end %>  end
-
-  def select_search_field() do
-    :<%= schema.attrs |> List.first() |> elem(0) %>
-  end
 end
 
+<% display_field = Mix.Mandarin.Schema.default_search_field(schema) %><%= if display_field do %>
 defimpl ForageWeb.Display, for: <%= inspect schema.module %> do
-  def display(<%= schema.singular %>) do
-    "#{<%= schema.singular %>.<%= schema.attrs |> List.first() |> elem(0) %>}"
+  def as_text(<%= schema.singular %>) do
+    to_string(<%= schema.singular %>.<%= display_field %>)
   end
-end
+
+  def as_html(<%= schema.singular %>) do
+    as_text(<%= schema.singular %>)
+  end
+end<% end %>

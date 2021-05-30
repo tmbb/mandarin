@@ -3,7 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><%%= dgettext("mandarin.<%= context.basename %>", "<%= install.web_module %>") %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <%%= csrf_meta_tag() %>
+    <title><%%= dgettext("mandarin.<%= install.context_underscore %>", "<%= install.web_module %>") %></title>
     <%# Tell the browser to be responsive to screen width %>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.0/css/bootstrap.min.css">
@@ -42,7 +44,7 @@
       <a class="navbar-brand" href="#"><%= install.web_module %></a>
       <ul class="navbar-nav">
         <li class="nav-item active">
-          <a class="nav-link" href="/"><%= dgettext("mandarin.<%= context.basename %>", "Home") %></a>
+          <a class="nav-link" href="/"><%%= dgettext("mandarin.<%= install.context_underscore %>", "Home") %></a>
         </li>
       </ul>
     </nav>
@@ -56,21 +58,21 @@
 
         <%## A place to display flash messages (e.g. "Object created", "Object deleted") %>
         <div class="col-sm-10">
-          <%
+          <%%
           info = get_flash(@conn, :info)
           error = get_flash(@conn, :error)
           %>
-          <%= if info do %>
-            <div class="alert alert-info" role="alert"><%= info %></div>
-          <% end %>
-          <%= if error do %>
-            <div class="alert alert-danger" role="alert"><%= error %></div>
-          <% end %>
+          <%%= if info do %>
+            <div class="alert alert-info" role="alert"><%%= info %></div>
+          <%% end %>
+          <%%= if error do %>
+            <div class="alert alert-danger" role="alert"><%%= error %></div>
+          <%% end %>
 
           <%## The main content of the view %>
           <div class="card">
             <div class="card-body">
-              <%= @inner_content %>
+              <%%= @inner_content %>
             </div>
           </div>
         </div>
@@ -80,7 +82,7 @@
       <footer class="my-5 pt-5 text-muted text-center text-small">
         <p class="mb-1">
           <%%= raw(
-            dgettext("mandarin.<%= context.basename %>", """
+            dgettext("mandarin.<%= install.context_underscore %>", """
             <strong>Copyright &copy; <%= DateTime.utc_now() |> Map.fetch!(:year) %> <a href="#"><%= install.web_module %></a>.</strong> All rights reserved.
             """)) %>
         </p>
@@ -88,15 +90,15 @@
         <ul class="list-inline">
           <%## Make it so that this link leads somewhere or delete it %>
           <li class="list-inline-item">
-            <a href="#"><%%= dgettext("mandarin.<%= context.basename %>", "Privacy") %></a>
+            <a href="#"><%%= dgettext("mandarin.<%= install.context_underscore %>", "Privacy") %></a>
           </li>
           <%## Make it so that this link leads somewhere or delete it %>
           <li class="list-inline-item">
-            <a href="#"><%%= dgettext("mandarin.<%= context.basename %>", "Terms") %></a>
+            <a href="#"><%%= dgettext("mandarin.<%= install.context_underscore %>", "Terms") %></a>
           </li>
           <%## Make it so that this link leads somewhere or delete it %>
           <li class="list-inline-item">
-            <a href="#"><%%= dgettext("mandarin.<%= context.basename %>", "Support") %></a>
+            <a href="#"><%%= dgettext("mandarin.<%= install.context_underscore %>", "Support") %></a>
           </li>
         </ul>
       </footer>
@@ -104,8 +106,6 @@
 
     <%%# Your app's Javascrip + Phoenix specific Javascript %>
     <script src='<%%= Routes.static_path(@conn, "/js/app.js") %>'></script>
-    <%%# Bootstrap 3.3.7 %>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.0/js/bootstrap.min.js"></script>
     <%%# Forage-specific utilities (loads JQuery by default) %>
     <%%# - Imports the necessary javascript for the select widget to work at all %>
     <%%= ForageWeb.Assets.forage_select_assets() %>

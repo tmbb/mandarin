@@ -1,6 +1,7 @@
 defmodule Mix.Mandarin.Context do
   @moduledoc false
 
+  alias Mandarin.Naming
   alias Mix.Mandarin.{Context, Schema}
 
   defstruct name: nil,
@@ -8,6 +9,7 @@ defmodule Mix.Mandarin.Context do
             schema: nil,
             alias: nil,
             base_module: nil,
+            mandarin_web_module: nil,
             web_module: nil,
             basename: nil,
             file: nil,
@@ -23,6 +25,7 @@ defmodule Mix.Mandarin.Context do
 
   def new(context_name, %Schema{} = schema, opts) do
     ctx_app = opts[:context_app] || Mix.Mandarin.context_app()
+    mandarin_web_module = Naming.mandarin_web_module(ctx_app)
     base = Module.concat([Mix.Mandarin.context_base(ctx_app)])
     module = Module.concat(base, context_name)
     alias = Module.concat([module |> Module.split() |> List.last()])
@@ -41,6 +44,7 @@ defmodule Mix.Mandarin.Context do
       alias: alias,
       base_module: base,
       web_module: web_module(),
+      mandarin_web_module: mandarin_web_module,
       basename: basename,
       file: file,
       test_file: test_file,

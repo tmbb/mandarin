@@ -72,6 +72,18 @@ defmodule Mandarin.Naming do
   defp to_lower_char(char), do: char
 
   @doc """
+  TODO
+  """
+  def mandarin_web_module(context_app) do
+    app_camelcase = context_app |> to_string() |> Macro.camelize()
+    "#{app_camelcase}Web.Mandarin"
+  end
+
+  def mandarin_web_path(web_prefix) do
+    Path.join(web_prefix, "mandarin.ex")
+  end
+
+  @doc """
   Converts String to camel case.
 
   Takes an optional `:lower` option to return lowerCamelCase.

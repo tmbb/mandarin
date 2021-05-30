@@ -1,12 +1,9 @@
 defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Module.concat(schema.web_namespace, schema.alias) %>Controller do
-  use <%= inspect context.web_module %>, :controller
+  use <%= context.mandarin_web_module %>, :controller
 
   alias <%= inspect context.module %>
   alias <%= inspect schema.module %>
   alias ForageWeb.ForageController
-
-  # Adds the the resource type to the conn
-  plug Mandarin.Plugs.Resource, :<%= schema.singular %>
 
   def index(conn, params) do
     <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)
@@ -66,8 +63,11 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
     |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :index, redirect_params))
   end
 
-  def select(conn, params) do
-    <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)
+  def select(conn, %{"_search" => _search_term} = params) do
+    # Page of database records matching the search term
+    <%= schema.plural %> = <%= inspect context.alias %>.search_<%= schema.plural %>(params)
+    # Extract only the data we care about
+    # For greater efficiency, you can write a custom search query that already returns the data you want
     data = ForageController.forage_select_data(<%= schema.plural %>)
     json(conn, data)
   end

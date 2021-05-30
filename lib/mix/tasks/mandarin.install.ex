@@ -9,6 +9,7 @@ defmodule Mix.Tasks.Mandarin.Install do
   require EEx
 
   alias Mix.Mandarin.Install
+  alias Mandarin.Naming
 
   @switches [web: :string]
 
@@ -18,19 +19,22 @@ defmodule Mix.Tasks.Mandarin.Install do
     context_camel_case =
       case args do
         [arg] -> arg
-        _ -> Mix.raise(~s'mix mandarin.install requires a context name (i.e. "Admin")')
+        _ -> Mix.raise(~s'mix mandarin.install requires a context name (e.g. "Admin")')
       end
 
     context_app = Mix.Mandarin.context_app()
     context_app_camelcase = context_app |> to_string() |> Macro.camelize()
     context_underscore = Macro.underscore(context_camel_case)
     web_module = "#{context_app_camelcase}Web"
+    mandarin_web_module = Naming.mandarin_web_module(context_app)
     layout_view_underscore = "#{context_underscore}_layout_view"
     layout_view_camel_case = Macro.camelize(layout_view_underscore)
 
     %Install{
       app: app,
+      context_app: context_app,
       context_camel_case: context_camel_case,
+      mandarin_web_module: mandarin_web_module,
       web_module: web_module,
       context_underscore: context_underscore,
       layout_view_camel_case: layout_view_camel_case,
@@ -57,56 +61,15 @@ defmodule Mix.Tasks.Mandarin.Install do
     _test_prefix = Mix.Mandarin.web_test_path(context_app)
 
     install = build(args, app, web_prefix)
-
-    layout_dir = "#{install.context_underscore}_layout"
-
-    # These paths are relative to the user's project (because they are used at runtime)
-    layout_html_path = Path.join([web_prefix, "templates", layout_dir, "layout.html.eex"])
-
-    sidebar_html_path = Path.join([web_prefix, "templates", layout_dir, "sidebar.html.eex"])
-
-    layout_view_path =
-      Path.join([web_prefix, "views", "#{install.context_underscore}_layout_view.ex"])
-
-    # Index page
-    index_template_path =
-      Path.join([
-        web_prefix,
-        "templates",
-        "#{install.context_underscore}",
-        "index",
-        "index.html.eex"
-      ])
-
-    index_controller_path =
-      Path.join([
-        web_prefix,
-        "controllers",
-        "#{install.context_underscore}",
-        "index_controller.ex"
-      ])
-
-    index_view_path =
-      Path.join([web_prefix, "views", "#{install.context_underscore}", "index_view.ex"])
+    binding = [install: install]
+    paths = Mix.Mandarin.generator_paths()
 
     # Add the extra scope and pipeline to the Router
     customize_router(install)
 
     # Add pagination capabilities to the Repo
     customize_repo(install)
-
-    paths = [layout_html_path, sidebar_html_path, layout_view_path]
-
-    prompt_for_conflicts(paths)
-
-    write_p!(layout_html_path, layout_html(install))
-    write_p!(sidebar_html_path, sidebar_html(install))
-    write_p!(layout_view_path, layout_view(install))
-    # Index page
-    write_p!(index_template_path, index_template(install))
-    write_p!(index_controller_path, index_controller(install))
-    write_p!(index_view_path, index_view(install))
-
+    copy_new_files(install, paths, binding)
     print_shell_instructions(install)
   end
 
@@ -146,10 +109,6 @@ defmodule Mix.Tasks.Mandarin.Install do
     end
   end
 
-  defp prompt_for_conflicts(_paths) do
-    nil
-  end
-
   defp inject_eex_before_final_end(content_to_inject, file_path) do
     file = File.read!(file_path)
 
@@ -171,64 +130,81 @@ defmodule Mix.Tasks.Mandarin.Install do
     File.write!(file, content)
   end
 
-  # These paths are relative to the mandarin project (because they are used at compile time)
-  @external_resource "priv/templates/mandarin.install/layout.html.eex"
-  @external_resource "priv/templates/mandarin.install/sidebar.html.eex"
-  @external_resource "priv/templates/mandarin.install/layout_view.ex"
-  @external_resource "priv/templates/mandarin.install/router.ex"
-  # Index page (contains a template, a view and a controller)
-  @external_resource "priv/templates/mandarin.install/index.html.eex"
-  @external_resource "priv/templates/mandarin.install/index_view.ex"
-  @external_resource "priv/templates/mandarin.install/index_controller.ex"
+  # Path to the sidebar template
+  # This path must be accessible from outside this module
+  # when we want to populate the sidebar links automatically
+  def sidebar_path(context_app, context_underscore) do
+    ctx_basename = context_underscore
+    web_prefix = Mix.Mandarin.web_path(context_app)
+    group_dir = Path.join([web_prefix, ctx_basename])
+    layout_feature_dir = Path.join(group_dir, "_layout")
+    layout_templates_dir = Path.join(layout_feature_dir, "templates")
+    layout_sidebar_template_path = Path.join(layout_templates_dir, "sidebar.html.eex")
 
-  EEx.function_from_file(
-    :defp,
-    :layout_html,
-    "priv/templates/mandarin.install/layout.html.eex",
-    [:install]
-  )
+    layout_sidebar_template_path
+  end
 
-  EEx.function_from_file(
-    :defp,
-    :sidebar_html,
-    "priv/templates/mandarin.install/sidebar.html.eex",
-    [:install]
-  )
+  def files_to_be_generated(%Install{} = install) do
+    context_app = install.context_app
+    ctx_basename = install.context_underscore
 
-  EEx.function_from_file(
-    :defp,
-    :layout_view,
-    "priv/templates/mandarin.install/layout_view.ex",
-    [:install]
-  )
+    web_prefix = Mix.Mandarin.web_path(context_app)
+    # TODO: add tests for this functionality (at least for the index controller)
+    _test_prefix = Mix.Mandarin.web_test_path(context_app)
+
+    group_dir = Path.join([web_prefix, ctx_basename])
+
+    mandarin_web_path = Naming.mandarin_web_path(web_prefix)
+    # We'll generate two features: "index" and "layout"
+    index_feature_dir = Path.join(group_dir, "index")
+    index_controller_path = Path.join(index_feature_dir, "index_controller.ex")
+    index_view_path = Path.join(index_feature_dir, "index_view.ex")
+    index_template_path = Path.join([index_feature_dir, "templates", "index.html.eex"])
+
+
+    layout_feature_dir = Path.join(group_dir, "_layout")
+    layout_view_path = Path.join(layout_feature_dir, "layout_view.ex")
+    layout_templates_dir = Path.join(layout_feature_dir, "templates")
+    layout_layout_template_path = Path.join(layout_templates_dir, "layout.html.eex")
+    layout_sidebar_template_path = sidebar_path(context_app, install.context_underscore)
+
+    maybe_mandarin_web =
+      # Only generate this file if it doesn't exist already
+      # (it's quite likely that the user will want to customize this file)
+      case File.exists?(mandarin_web_path) do
+        # The file that will allow Mandarin to use "vertical slices" even if the rest
+        # of the application uses the (IMO inferior) horizontal slices.
+        false -> [{:eex, "mandarin_web.ex", mandarin_web_path}]
+        true -> []
+      end
+
+    [
+      # Files related to the default "index" page for a mandarin CRUD interface
+      {:eex, "index_controller.ex", index_controller_path},
+      {:eex, "index_view.ex", index_view_path},
+      {:eex, "index.html.eex", index_template_path},
+      # Files related to the "layout" page for a mandarin CRUD interface
+      {:eex, "layout_view.ex", layout_view_path},
+      {:eex, "layout.html.eex", layout_layout_template_path},
+      {:eex, "sidebar.html.eex", layout_sidebar_template_path},
+    ] ++ maybe_mandarin_web
+  end
+
+  router_template = "priv/templates/mandarin.install/router.ex"
+  @external_resource router_template
 
   EEx.function_from_file(
     :defp,
     :new_pipeline_and_scope,
-    "priv/templates/mandarin.install/router.ex",
+    router_template,
     [:install, :requires_mandarin_router?]
   )
 
-  EEx.function_from_file(
-    :defp,
-    :index_template,
-    "priv/templates/mandarin.install/index.html.eex",
-    [:install]
-  )
-
-  EEx.function_from_file(
-    :defp,
-    :index_view,
-    "priv/templates/mandarin.install/index_view.ex",
-    [:install]
-  )
-
-  EEx.function_from_file(
-    :defp,
-    :index_controller,
-    "priv/templates/mandarin.install/index_controller.ex",
-    [:install]
-  )
+  @doc false
+  def copy_new_files(%Install{} = install, paths, binding) do
+    files = files_to_be_generated(install)
+    Mix.Mandarin.copy_from(paths, "priv/templates/mandarin.install", binding, files)
+  end
 
   @doc false
   def print_shell_instructions(%Install{} = install) do
@@ -237,34 +213,37 @@ defmodule Mix.Tasks.Mandarin.Install do
       context_underscore: ctx,
       web_module: web_module,
       web_path: web_path,
-      layout_view_camel_case: layout_view_camel_case,
-      layout_view_underscore: layout_view_underscore
+      layout_view_camel_case: layout_view_camel_case
     } = install
+
+    files =
+      for {_eex, file, path} <- files_to_be_generated(install), into: %{} do
+        {file, path}
+    end
+
 
     Mix.shell().info("""
     The following files have been generated:
 
-      * "#{web_path}/views/#{layout_view_underscore}.ex"
-          - the view for the admin controllers
+      * "#{files["layout_view.ex"]}"
+          - the layout view for the mandarin pages
 
-      * "#{web_path}/templates/#{layout_view_underscore}/layout.html.eex"
-          - the layout for the admin pages
+      * "#{files["layout.html.eex"]}"
+          - the layout templates for the mandarin pages
 
-      * "#{web_path}/templates/#{layout_view_underscore}/sidebar-links.html.eex"
+      * "#{files["sidebar.html.eex"]}"
           - the sidebar links for the admin pages;
             when a new resource is generated, a new link will be appended to this list
 
-      * "#{web_path}/templates/#{layout_view_underscore}/sidebar.html.eex"
-          - template for the sidebar in the admin pages
-
-      * "#{web_path}/templates/#{ctx}/index.html.eex"
-          - the template for the index page
-
-      * "#{web_path}/views/#{ctx}/sidebar.html.eex"
+      * "#{files["index_view.ex"]}"
           - the view for the index page
 
-      * "#{web_path}/controllers/#{ctx}/sidebar.html.eex"
-           - the controller for the index page
+      * "#{files["index_controller.ex"]}"
+          - the controller for the index page
+
+
+      * "#{files["index.html.eex"]}"
+          - the template for the index page
 
     A new pipeline and a new scope have been injected in the "#{web_path}/router.ex" file.
     Admin routes should be sent through this pipeline so that they use the right layout:

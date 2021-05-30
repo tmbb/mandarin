@@ -49,7 +49,6 @@ defmodule Mandarin.Router do
 
     quote do
       unquote(select_route)
-      # Phoenix.Router.get(unquote(select_path), unquote(module), :select)
       Phoenix.Router.resources(unquote(prefix), unquote(module), unquote(opts_without_select))
     end
   end

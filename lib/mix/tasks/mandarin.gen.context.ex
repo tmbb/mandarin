@@ -248,12 +248,12 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     Mix.raise("""
     #{msg}
 
-    mix mandarin.gen.html expects a context module name,
+    mix mandarin.gen.context expects a context module name,
     followed by singular and plural names of the generated resource,
     ending with any number of attributes.
     For example:
 
-        mix mandarin.gen.html Accounts User users name:string --binary-id
+        mix mandarin.gen.context Accounts User users name:string --binary-id
 
     The context serves as the API boundary for the given resource.
     Multiple resources may belong to a context and a resource may be

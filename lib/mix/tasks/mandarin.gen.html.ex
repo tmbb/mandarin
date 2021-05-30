@@ -109,7 +109,11 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     end
 
     {context, schema} = Gen.Context.build(args)
-    Gen.Context.prompt_for_code_injection(context)
+
+    # The user can disable the prompt by supplying the --yes switch
+    unless "--yes" in args do
+      Gen.Context.prompt_for_code_injection(context)
+    end
 
     binding = [
       context: context,
@@ -128,11 +132,12 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     |> print_shell_instructions()
   end
 
-  @links_end "\n  <%# %% Resource Links - END %% %>\n"
+  @links_end "\n  <%# %% Resource Links - END %% %>"
 
   defp maybe_insert_links(file, context, schema) do
     contents = File.read!(file)
-    link_header = "<%# Sidebar links for #{inspect(schema.alias)} %>"
+    IO.inspect(schema.alias)
+    link_header = "    <%# * Sidebar link for #{inspect(schema.alias)} %>"
 
     case String.contains?(contents, link_header) do
       # The sidebar already contains a link to this resource
@@ -144,11 +149,20 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         case String.split(contents, @links_end, parts: 2) do
           [part1, part2] ->
             link = sidebar_link(context, schema)
-            new_contents = part1 <> "\n" <> String.trim_trailing(link) <> @links_end <> part2
+            # Use the fact that `File.write!/2` works with iolists
+            new_contents = [
+              part1,
+              "\n",
+              link_header,
+              "\n",
+              String.trim_trailing(link),
+              @links_end,
+              part2
+            ]
 
             File.write!(file, new_contents)
 
-          _ ->
+          _other ->
             # The user has deleted the link markers...
             nil
         end
@@ -163,10 +177,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   )
 
   defp maybe_add_links_to_sidebar(%Context{schema: schema, context_app: context_app} = context) do
-    web_prefix = Mix.Mandarin.web_path(context_app)
-
-    sidebar_template_path =
-      Path.join([web_prefix, "templates", "#{context.basename}_layout", "sidebar.html.eex"])
+    sidebar_template_path = Mix.Tasks.Mandarin.Install.sidebar_path(context_app, context.basename)
 
     if File.exists?(sidebar_template_path) do
       maybe_insert_links(sidebar_template_path, context, schema)
@@ -197,89 +208,33 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     web_path = to_string(schema.web_path)
     ctx_basename = context.basename
 
+    feature_dir = Path.join([web_prefix, ctx_basename, schema.singular])
+    template_dir = Path.join(feature_dir, "templates")
+
+    controller_path = Path.join(feature_dir, "#{schema.singular}_controller.ex")
+    view_path = Path.join(feature_dir, "#{schema.singular}_view.ex")
+    controller_test_path =
+      Path.join([
+        test_prefix,
+        "controllers",
+        web_path,
+        ctx_basename,
+        "#{schema.singular}_controller_test.exs"
+      ])
+
+    html_templates =
+      for name <- ~w(edit filters form index new show table) do
+        filename = "#{name}.html.eex"
+        output_path = Path.join(template_dir, filename)
+        {:eex, filename, output_path}
+      end
+
+
     [
-      {:eex, "controller.ex",
-       Path.join([
-         web_prefix,
-         "controllers",
-         web_path,
-         ctx_basename,
-         "#{schema.singular}_controller.ex"
-       ])},
-      {:eex, "edit.html.eex",
-       Path.join([
-         web_prefix,
-         "templates",
-         web_path,
-         ctx_basename,
-         schema.singular,
-         "edit.html.eex"
-       ])},
-      {:eex, "filters.html.eex",
-       Path.join([
-         web_prefix,
-         "templates",
-         web_path,
-         ctx_basename,
-         schema.singular,
-         "filters.html.eex"
-       ])},
-      {:eex, "form.html.eex",
-       Path.join([
-         web_prefix,
-         "templates",
-         web_path,
-         ctx_basename,
-         schema.singular,
-         "form.html.eex"
-       ])},
-      {:eex, "index.html.eex",
-       Path.join([
-         web_prefix,
-         "templates",
-         web_path,
-         ctx_basename,
-         schema.singular,
-         "index.html.eex"
-       ])},
-      {:eex, "new.html.eex",
-       Path.join([
-         web_prefix,
-         "templates",
-         web_path,
-         ctx_basename,
-         schema.singular,
-         "new.html.eex"
-       ])},
-      {:eex, "show.html.eex",
-       Path.join([
-         web_prefix,
-         "templates",
-         web_path,
-         ctx_basename,
-         schema.singular,
-         "show.html.eex"
-       ])},
-      {:eex, "table.html.eex",
-       Path.join([
-         web_prefix,
-         "templates",
-         web_path,
-         ctx_basename,
-         schema.singular,
-         "table.html.eex"
-       ])},
-      {:eex, "view.ex",
-       Path.join([web_prefix, "views", web_path, ctx_basename, "#{schema.singular}_view.ex"])},
-      {:eex, "controller_test.exs",
-       Path.join([
-         test_prefix,
-         "controllers",
-         web_path,
-         ctx_basename,
-         "#{schema.singular}_controller_test.exs"
-       ])}
-    ]
+      {:eex, "controller.ex", controller_path},
+      {:eex, "view.ex", view_path},
+      {:eex, "controller_test.exs", controller_test_path}
+    ] ++ html_templates
   end
 
   @doc false
@@ -292,32 +247,19 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
   @doc false
   def print_shell_instructions(%Context{schema: schema, context_app: ctx_app} = context) do
-    # if schema.web_namespace do
-
     ctx_web_path = Mix.Mandarin.web_path(ctx_app)
-    scope = Module.concat(context.web_module, context.alias)
-
     Mix.shell().info("""
 
     Add the resource to your #{schema.web_namespace} :browser scope in #{ctx_web_path}/router.ex:
 
-        scope "/#{schema.web_path}", #{inspect(scope)}, as: :#{context.basename} do
+        scope "/#{schema.web_path}", #{inspect(context.basename)}, as: :#{context.basename} do
           pipe_through([:browser, :#{context.basename}_layout])
           ...
           Mandarin.Router.resources("/#{schema.plural}", #{inspect(schema.alias)}Controller)
         end
+
+    You probably want to add some authentication to these routes.
     """)
-
-    # else
-    #   Mix.shell().info("""
-
-    #   Add the resource to your browser scope in #{Mix.Mandarin.web_path(ctx_app)}/router.ex:
-
-    #       Mandarin.Router.resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
-    #   """)
-    # end
-
-    if context.generate?, do: Gen.Context.print_shell_instructions(context)
   end
 
   defp inputs(%Context{schema: schema} = context) do
@@ -380,15 +322,11 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
       Enum.map(schema.assocs, fn
         {key, _atom_singular_id, _full_module_name, atom_plural} ->
           path_part = Naming.singularize(atom_plural)
-          module_alias = Naming.table_name_to_module_name(atom_plural)
-          field = "#{module_alias}.select_search_field()"
           path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
 
           {label(key),
            ~s'''
-           <%= forage_select f, :#{key},
-                      path: #{path},
-                      remote_field: #{field} %>\
+           <%= forage_select f, :#{key}, path: #{path} %>\
            ''', error(key)}
       end)
 
@@ -431,15 +369,11 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     assoc_filters =
       Enum.map(schema.assocs, fn {key, _atom_singular_id, _full_module_name, atom_plural} ->
         path_part = Naming.singularize(atom_plural)
-        module_alias = Naming.table_name_to_module_name(atom_plural)
-        field = "#{module_alias}.select_search_field()"
         path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
 
         """
           <%= forage_horizontal_form_group #{inspect(key)} do %>
-            <%= forage_select_filter f, :#{key},
-                  path: #{path},
-                  remote_field: #{field} %>
+            <%= forage_select_filter f, :#{key}, path: #{path} %>
           <% end %>\
         """
       end)
@@ -448,7 +382,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   end
 
   defp label(key) do
-    ~s(<%= label f, #{inspect(key)}, class: "control-label col-sm-2" %>)
+    ~s(<%= label f, #{inspect(key)}, class: "control-label" %>)
   end
 
   defp error(field) do

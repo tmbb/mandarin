@@ -12,7 +12,7 @@
 <% end %><%= for {k, _, _, _} <- schema.assocs do %>
   <li>
     <strong><%%= dgettext("mandarin.<%= context.basename %>", "<%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:") %></strong>
-    <%%= forage_display(@<%= schema.singular %>.<%= k %>) %>
+    <%%= forage_as_html(@<%= schema.singular %>.<%= k %>) %>
   </li>
 <% end %>
 </ul>
@@ -24,6 +24,3 @@
 <hr/>
 <%%# Copy the functionality of the back button exactly %>
 <span><button onclick="window.history.back()" class="btn btn-block btn-primary "><%%= back_link_content %></button></span>
-
-
-

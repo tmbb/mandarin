@@ -13,10 +13,9 @@
 <%%= <%= context.basename %>_<%= schema.singular %>_pagination_widget(
         @conn,
         @<%= schema.plural %>,
-        previous: dgettext("mandarin.<%= context.basename %>", "« Previous"),
-        next: dgettext("mandarin.<%= context.basename %>", "Next »")
+        previous: dgettext("mandarin.<%= context.basename %>", "← Previous"),
+        next: dgettext("mandarin.<%= context.basename %>", "Next →")
       ) %>
 
 <%%# Filters %>
 <%%= render "filters.html", assigns %>
-

@@ -16,7 +16,7 @@
   path = "Routes.#{context.basename}_#{path_part}_path"
 %>      <td>
         <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>.id) %>">
-          <%%= forage_display(<%= schema.singular %>.<%= key %>) %>
+          <%%= forage_as_html(<%= schema.singular %>.<%= key %>) %>
         </a>
       </td>
 <% end %>
