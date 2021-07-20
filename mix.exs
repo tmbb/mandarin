@@ -11,7 +11,8 @@ defmodule Mandarin.MixProject do
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -25,9 +26,8 @@ defmodule Mandarin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix, "~> 1.4"},
-      # {:forage, "~> 0.2"},
-      {:forage, path: "../forage"},
+      {:phoenix, "~> 1.5"},
+      {:forage, "~> 0.4"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:inflex, "~> 2.0.0"},
@@ -45,6 +45,12 @@ defmodule Mandarin.MixProject do
       name: "mandarin",
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/tmbb/mandarin"}
+    ]
+  end
+
+  defp aliases() do
+    [
+      publish: "run scripts/publish.exs"
     ]
   end
 end
