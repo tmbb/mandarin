@@ -2,6 +2,30 @@ defmodule Mix.Mandarin do
   # Conveniences for Mandarin tasks.
   @moduledoc false
 
+  require Logger
+
+  @mandarin_dont_touch_marker "%% MANDARIN:DONT-TOUCH %%"
+
+  @doc """
+
+  """
+  def dont_touch_marker() do
+    @mandarin_dont_touch_marker
+  end
+
+  defmacro if_can_touch(path, do: body) do
+    quote do
+      if File.exists?(unquote(path)) and
+          String.contains?(File.read!(unquote(path)), unquote(@mandarin_dont_touch_marker)) do
+        message = "%% MANDARIN:DONT-TOUCH %% - The following path wasn't touched: #{unquote(path)}"
+        Logger.info(message)
+        :ok
+      else
+        unquote(body)
+      end
+    end
+  end
+
   @doc """
   Evals EEx files from source dir.
 
@@ -20,7 +44,7 @@ defmodule Mix.Mandarin do
   end
 
   defp maybe_format_code(text, file_name) do
-    if String.ends_with?(file_name, ".ex") do
+    if String.ends_with?(file_name, ".ex") or String.ends_with?(file_name, ".exs")do
       Code.format_string!(text)
     else
       text
@@ -44,29 +68,31 @@ defmodule Mix.Mandarin do
           if File.exists?(source), do: source
         end) || raise "could not find #{source_file_path} in any of the sources"
 
-      case format do
-        :text ->
-          Mix.Generator.create_file(target, File.read!(source))
+      if_can_touch target do
+        case format do
+          :text ->
+            Mix.Generator.create_file(target, File.read!(source))
 
-        :eex ->
-          text =
-            source
-            |> EEx.eval_file(binding)
-            |> maybe_format_code(target)
-
-          Mix.Generator.create_file(target, text)
-
-        :new_eex ->
-          if File.exists?(target) do
-            :ok
-          else
+          :eex ->
             text =
               source
               |> EEx.eval_file(binding)
               |> maybe_format_code(target)
 
             Mix.Generator.create_file(target, text)
-          end
+
+          :new_eex ->
+            if File.exists?(target) do
+              :ok
+            else
+              text =
+                source
+                |> EEx.eval_file(binding)
+                |> maybe_format_code(target)
+
+              Mix.Generator.create_file(target, text)
+            end
+        end
       end
     end
   end

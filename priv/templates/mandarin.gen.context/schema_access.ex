@@ -31,7 +31,7 @@
   """<% search_field = Mix.Mandarin.Schema.default_search_field(schema) %><%= if search_field do %>
   def search_<%= schema.plural %>(params) do
     search_params = Forage.naive_search_params(params, :<%= search_field %>)
-    list_<%= schema.plural %>(search_params)
+    Forage.paginate(search_params, <%= inspect schema.alias %>, Repo, sort: <%= inspect(sort_fields) %>)
   end<% else %>
   def search_<%= schema.plural %>(_params) do
     raise UndefinedFunctionError, "<%= inspect(schema.alias) %> doesn't have a string field that can be used for for search"

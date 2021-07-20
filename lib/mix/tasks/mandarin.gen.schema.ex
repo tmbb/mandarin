@@ -51,6 +51,8 @@ defmodule Mix.Tasks.Mandarin.Gen.Schema do
   This will result in a migration with an `:integer` column
   of `:user_id` and create an index.
 
+  **TODO:** Support many-to-many relations.
+
   Furthermore an array type can also be given if it is
   supported by your database, although it requires the
   type of the underlying array element to be given too:
@@ -99,7 +101,9 @@ defmodule Mix.Tasks.Mandarin.Gen.Schema do
     binary_id: :boolean,
     table: :string,
     web: :string,
-    context_app: :string
+    context_app: :string,
+    quiet: :boolean,
+    yes: :boolean
   ]
 
   @doc false
@@ -110,12 +114,17 @@ defmodule Mix.Tasks.Mandarin.Gen.Schema do
 
     schema = build(args, [])
     paths = Mix.Mandarin.generator_paths()
+    binding = [schema: schema]
 
-    prompt_for_conflicts(schema)
+    unless schema.yes do
+      prompt_for_conflicts(schema)
+    end
 
-    schema
-    |> copy_new_files(paths, schema: schema)
-    |> print_shell_instructions()
+    new_schema = copy_new_files(schema, paths, binding)
+
+    unless schema.quiet do
+      print_shell_instructions(new_schema)
+    end
   end
 
   defp prompt_for_conflicts(schema) do

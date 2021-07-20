@@ -17,6 +17,8 @@ defmodule Mix.Mandarin.Context do
             dir: nil,
             generate?: true,
             context_app: nil,
+            quiet: nil,
+            yes: nil,
             opts: []
 
   def valid?(context) do
@@ -33,7 +35,10 @@ defmodule Mix.Mandarin.Context do
     basename = Path.basename(basedir)
     dir = Mix.Mandarin.context_lib_path(ctx_app, basedir)
     test_dir = Mix.Mandarin.context_test_path(ctx_app, basedir)
-    file = Path.join([dir, basename <> ".ex"])
+    # Add an underscore before the basename so that the context module
+    # is the first in alphabetical order. It makes the context vs changeset
+    # hierarchy easier to visualize.
+    file = Path.join([dir, "_" <> basename <> ".ex"])
     test_file = Path.join([test_dir, basename <> "_test.exs"])
     generate? = Keyword.get(opts, :context, true)
 

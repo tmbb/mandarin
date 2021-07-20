@@ -4,6 +4,6 @@
 <%= for filter <- filters, filter do %>
 <%= filter %>
 <% end %>
-  <%% search_button_content = [content_tag(:i, "", class: "fa fa-search"), dgettext("mandarin.<%= context.basename %>", " Search")] %>
+  <%% search_button_content = [content_tag(:i, "", class: "fas fa-search"), dgettext("mandarin.<%= context.basename %>", " Search")] %>
   <%%= submit search_button_content, class: "btn btn-block btn-primary" %>
 <%% end %>

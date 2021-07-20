@@ -31,7 +31,7 @@ defmodule Mandarin.MixProject do
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:inflex, "~> 2.0.0"},
-      {:ex_doc, "~> 0.19", only: :dev}
+      {:ex_doc, "~> 0.23", only: :dev}
     ]
   end
 

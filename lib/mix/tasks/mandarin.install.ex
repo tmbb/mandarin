@@ -78,12 +78,9 @@ defmodule Mix.Tasks.Mandarin.Install do
     router_path = Path.join([install.web_path, "router.ex"])
 
     if File.exists?(router_path) do
-      router_contents = File.read!(router_path)
+      _router_contents = File.read!(router_path)
 
-      requires_mandarin_router? =
-        String.match?(router_contents, ~r/\n\s*require\s+Mandarin.Router\s*\n/)
-
-      pipeline_and_scope = new_pipeline_and_scope(install, requires_mandarin_router?)
+      pipeline_and_scope = new_pipeline_and_scope(install)
       inject_eex_before_final_end(pipeline_and_scope, router_path)
     else
       Mix.shell().info("""
@@ -197,7 +194,7 @@ defmodule Mix.Tasks.Mandarin.Install do
     :defp,
     :new_pipeline_and_scope,
     router_template,
-    [:install, :requires_mandarin_router?]
+    [:install]
   )
 
   @doc false

@@ -30,7 +30,9 @@ defmodule Mix.Mandarin.Schema do
             web_path: nil,
             web_namespace: nil,
             context_app: nil,
-            route_helper: nil
+            route_helper: nil,
+            quiet: nil,
+            yes: nil
 
   @valid_types [
     :integer,
@@ -121,7 +123,9 @@ defmodule Mix.Mandarin.Schema do
       route_helper: route_helper(web_path, singular),
       sample_id: sample_id(opts),
       context_app: ctx_app,
-      generate?: generate?
+      generate?: generate?,
+      yes: cli_attrs[:yes],
+      quiet: cli_attrs[:quiet]
     }
   end
 

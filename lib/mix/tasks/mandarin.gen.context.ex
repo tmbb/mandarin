@@ -76,7 +76,9 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     web: :string,
     schema: :boolean,
     context: :boolean,
-    context_app: :string
+    context_app: :string,
+    quiet: :boolean,
+    yes: :boolean
   ]
 
   @default_opts [schema: true, context: true]
@@ -91,12 +93,17 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     binding = [context: context, schema: schema]
     paths = Mix.Mandarin.generator_paths()
 
-    prompt_for_conflicts(context)
-    prompt_for_code_injection(context)
+    unless context.yes do
+      prompt_for_conflicts(context)
+      prompt_for_code_injection(context)
+    end
 
-    context
-    |> copy_new_files(paths, binding)
-    |> print_shell_instructions()
+    new_context =
+      copy_new_files(context, paths, binding)
+
+    unless context.quiet do
+      print_shell_instructions(new_context)
+    end
   end
 
   defp prompt_for_conflicts(context) do
@@ -150,7 +157,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     context
   end
 
-  defp inject_schema_access(%Context{file: file} = context, paths, binding) do
+  defp inject_schema_access(%Context{file: file, schema: schema} = context, paths, binding) do
     unless Context.pre_existing?(context) do
       Mix.Generator.create_file(
         file,
@@ -158,12 +165,14 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
       )
     end
 
+    string_to_test_for = "alias #{inspect schema.module}\n"
+
     paths
     |> Mix.Mandarin.eval_from(
       "priv/templates/mandarin.gen.context/#{schema_access_template(context)}",
       binding
     )
-    |> inject_eex_before_final_end(file, binding)
+    |> inject_eex_before_final_end(string_to_test_for, file, binding)
   end
 
   defp write_file(content, file) do
@@ -187,10 +196,12 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     |> inject_eex_before_final_end(test_file, binding)
   end
 
-  defp inject_eex_before_final_end(content_to_inject, file_path, binding) do
+  defp inject_eex_before_final_end(content_to_inject, string_to_test_for \\ nil, file_path, binding) do
+    string_to_test_for = string_to_test_for || content_to_inject
+
     file = File.read!(file_path)
 
-    if String.contains?(file, String.trim(content_to_inject)) do
+    if String.contains?(file, String.trim(string_to_test_for)) do
       :ok
     else
       Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])

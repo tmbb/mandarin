@@ -136,8 +136,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
   defp maybe_insert_links(file, context, schema) do
     contents = File.read!(file)
-    IO.inspect(schema.alias)
-    link_header = "    <%# * Sidebar link for #{inspect(schema.alias)} %>"
+    link_header = "<%# * Sidebar link for #{inspect(schema.alias)} %>"
 
     case String.contains?(contents, link_header) do
       # The sidebar already contains a link to this resource
@@ -153,7 +152,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
             new_contents = [
               part1,
               "\n",
-              link_header,
+              ["    ", link_header],
               "\n",
               String.trim_trailing(link),
               @links_end,
@@ -255,14 +254,119 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         scope "/#{schema.web_path}", #{inspect(context.basename)}, as: :#{context.basename} do
           pipe_through([:browser, :#{context.basename}_layout])
           ...
-          Mandarin.Router.resources("/#{schema.plural}", #{inspect(schema.alias)}Controller)
+      #{routes_for_context(context)}
         end
 
     You probably want to add some authentication to these routes.
     """)
   end
 
-  defp inputs(%Context{schema: schema} = context) do
+  def routes_for_context(%Context{schema: schema} = _context) do
+    """
+        get "/#{schema.plural}/select", #{inspect(schema.alias)}Controller, :select
+        resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+    """
+  end
+
+  defp label_for(key) do
+    key
+    |> to_string()
+    # Turn the field name into something human-readable
+    |> Naming.humanize()
+    # Inspect the string (this will surround it in quotes and escape the special characters)
+    |> inspect()
+  end
+
+  defp i18n_label_for(context, key) do
+    ~s[dgettext("mandarin.#{context.basename}", #{label_for(key)})]
+  end
+
+  def inputs(%Context{schema: schema} = context) do
+    attrs =
+      Enum.map(schema.attrs, fn
+        {_, {:references, _}} ->
+          nil
+
+        {key, :integer} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_number_input/2) %>
+          """
+
+        {key, :float} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_number_input/2) %>
+          """
+
+        {key, :decimal} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_number_input/2) %>
+          """
+
+        {key, :boolean} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_checkbox/2) %>
+          """
+
+        {key, :text} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_textarea/2) %>
+          """
+
+        {key, :date} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_date_input/2) %>
+          """
+
+        {key, :time} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_time_select/2) %>
+          """
+
+        {key, :utc_datetime} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_datetime_select/2) %>
+          """
+
+        {key, :naive_datetime} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_datetime_select/2) %>
+          """
+
+        {key, {:array, :integer}} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)},
+                  &multiple_select(&1, &2, ["1": 1, "2": 2], class: "form-control")) %>
+          """
+
+        {key, {:array, _}} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)},
+                  &multiple_select(&1, &2, ["Option 1": "option1", "Option 2": "option2"], class: "form-control")) %>
+          """
+
+        {key, _} ->
+          """
+            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_text_input/2) %>
+          """
+      end)
+
+    assocs =
+      Enum.map(schema.assocs, fn
+        {key, _atom_singular_id, _full_module_name, atom_plural} ->
+          path_part = Naming.singularize(atom_plural)
+          path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
+
+          """
+            <%= forage_form_group(f, :previous_diseases, #{i18n_label_for(context, key)},
+                  &forage_select(&1, &2, path: #{path})) %>
+          """
+      end)
+
+    attrs ++ assocs
+  end
+
+  @doc false
+  def old_inputs(%Context{schema: schema} = context) do
     attrs =
       Enum.map(schema.attrs, fn
         {_, {:references, _}} ->
@@ -283,7 +387,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
            error(key)}
 
         {key, :boolean} ->
-          {label(key), ~s(<%= checkbox f, #{inspect(key)}, class: "form-control" %>), error(key)}
+          {label(key), ~s(<%= checkbox f, #{inspect(key)} %>), error(key)}
 
         {key, :text} ->
           {label(key), ~s(<%= textarea f, #{inspect(key)}, class: "form-control" %>), error(key)}

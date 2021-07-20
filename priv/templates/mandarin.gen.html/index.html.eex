@@ -3,7 +3,7 @@
   <small><%%= dgettext("mandarin.<%= context.basename %>", "(Browse <%= schema.human_plural %>)") %></small>
 </h1>
 
-<%% new_link_content = [content_tag(:i, "", class: "fa fa-plus"), dgettext("mandarin.<%= context.basename %>", " Create New")] %>
+<%% new_link_content = [content_tag(:i, "", class: "fas fa-plus"), dgettext("mandarin.<%= context.basename %>", " Create New")] %>
 <span><%%= link new_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :new), class: "btn btn-block btn-primary my-3" %></span>
 
 <%%# Table %>

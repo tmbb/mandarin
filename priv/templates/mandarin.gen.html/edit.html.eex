@@ -5,7 +5,6 @@
 
 <%%= render "form.html", Map.put(assigns, :action, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :update, @<%= schema.singular %>)) %>
 
-<%% back_link_content = [content_tag(:i, "", class: "fa fa-arrow-left"), dgettext("mandarin.<%= context.basename %>", " Back")] %>
+<%% back_link_content = [content_tag(:i, "", class: "fas fa-arrow-left"), dgettext("mandarin.<%= context.basename %>", " Back")] %>
 <%%# Copy the functionality of the back button exactly %>
 <span><button onclick="window.history.back()" class="btn btn-block btn-primary"><%%= back_link_content %></button></span>
-

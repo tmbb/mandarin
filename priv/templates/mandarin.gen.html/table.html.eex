@@ -22,9 +22,9 @@
 <% end %>
       <td>
         <%%# Icon definitions %>
-        <%% show_icon = content_tag(:i, "", class: "fa fa-eye", title: dgettext("mandarin.<%= context.basename %>", "Show")) %>
-        <%% edit_icon = content_tag(:i, "", class: "fa fa-edit", title: dgettext("mandarin.<%= context.basename %>", "Edit")) %>
-        <%% delete_icon = content_tag(:i, "", class: "fa fa-trash", title: dgettext("mandarin.<%= context.basename %>", "Delete")) %>
+        <%% show_icon = content_tag(:i, "", class: "fas fa-eye", title: dgettext("mandarin.<%= context.basename %>", "Show")) %>
+        <%% edit_icon = content_tag(:i, "", class: "fas fa-edit", title: dgettext("mandarin.<%= context.basename %>", "Edit")) %>
+        <%% delete_icon = content_tag(:i, "", class: "fas fa-trash", title: dgettext("mandarin.<%= context.basename %>", "Delete")) %>
         <%%# Links %>
         <div class="pull-right">
           <%%= link show_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :show, <%= schema.singular %>) %> &nbsp;

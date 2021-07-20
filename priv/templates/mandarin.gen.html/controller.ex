@@ -62,13 +62,22 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
     |> put_flash(:info, dgettext("mandarin.<%= context.basename %>", "<%= schema.human_singular %> deleted successfully."))
     |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :index, redirect_params))
   end
-
+<% display_field = Mix.Mandarin.Schema.default_search_field(schema) %><%= if display_field do %>
   def select(conn, %{"_search" => _search_term} = params) do
     # Page of database records matching the search term
     <%= schema.plural %> = <%= inspect context.alias %>.search_<%= schema.plural %>(params)
     # Extract only the data we care about
-    # For greater efficiency, you can write a custom search query that already returns the data you want
+    # For greater efficiency, you can write a custom search query
+    data = ForageController.forage_select_data(<%= schema.plural %>, :<%= display_field %>)
+    json(conn, data)
+  end<% else %>
+  def select(conn, %{"_search" => _search_term} = params) do
+    # Page of database records matching the search term
+    <%= schema.plural %> = <%= inspect context.alias %>.search_<%= schema.plural %>(params)
+    # Extract only the data we care about
+    # For greater efficiency, you can write a custom search query
     data = ForageController.forage_select_data(<%= schema.plural %>)
     json(conn, data)
   end
+<% end %>
 end
