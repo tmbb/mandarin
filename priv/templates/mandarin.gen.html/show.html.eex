@@ -18,9 +18,6 @@
 </ul>
 
 <%% edit_link_content = [content_tag(:i, "", class: "fas fa-edit"), dgettext("mandarin.<%= context.basename %>", " Edit")] %>
-<%% back_link_content = [content_tag(:i, "", class: "fas fa-arrow-left"),  dgettext("mandarin.<%= context.basename %>", " Back")] %>
 
 <span><%%= link edit_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, @<%= schema.singular %>), class: "btn btn-block btn-primary" %></span>
 <hr/>
-<%%# Copy the functionality of the back button exactly %>
-<span><button onclick="window.history.back()" class="btn btn-block btn-primary "><%%= back_link_content %></button></span>

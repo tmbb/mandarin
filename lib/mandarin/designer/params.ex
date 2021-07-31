@@ -5,7 +5,7 @@ defmodule Mandarin.Designer.Params do
             context: nil,
             table: nil,
             binary_id: true,
-            generate_migrations?: true,
+            generate_migration?: true,
             is_join_through?: false,
             yes?: true,
             fields: []

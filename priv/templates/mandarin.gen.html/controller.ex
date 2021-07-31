@@ -6,8 +6,8 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
   alias ForageWeb.ForageController
 
   def index(conn, params) do
-    <%= schema.plural %> = <%= inspect context.alias %>.list_<%= schema.plural %>(params)
-    render(conn, "index.html", <%= schema.plural %>: <%= schema.plural %>)
+    <%= schema.pluralized %> = <%= inspect context.alias %>.list_<%= schema.pluralized %>(params)
+    render(conn, "index.html", <%= schema.pluralized %>: <%= schema.pluralized %>)
   end
 
   def new(conn, _params) do
@@ -65,18 +65,18 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
 <% display_field = Mix.Mandarin.Schema.default_search_field(schema) %><%= if display_field do %>
   def select(conn, %{"_search" => _search_term} = params) do
     # Page of database records matching the search term
-    <%= schema.plural %> = <%= inspect context.alias %>.search_<%= schema.plural %>(params)
+    <%= schema.pluralized %> = <%= inspect context.alias %>.search_<%= schema.pluralized %>(params)
     # Extract only the data we care about
     # For greater efficiency, you can write a custom search query
-    data = ForageController.forage_select_data(<%= schema.plural %>, :<%= display_field %>)
+    data = ForageController.forage_select_data(<%= schema.pluralized %>, :<%= display_field %>)
     json(conn, data)
   end<% else %>
   def select(conn, %{"_search" => _search_term} = params) do
     # Page of database records matching the search term
-    <%= schema.plural %> = <%= inspect context.alias %>.search_<%= schema.plural %>(params)
+    <%= schema.pluralized %> = <%= inspect context.alias %>.search_<%= schema.pluralized %>(params)
     # Extract only the data we care about
     # For greater efficiency, you can write a custom search query
-    data = ForageController.forage_select_data(<%= schema.plural %>)
+    data = ForageController.forage_select_data(<%= schema.pluralized %>)
     json(conn, data)
   end
 <% end %>

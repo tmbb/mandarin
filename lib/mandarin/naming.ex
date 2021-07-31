@@ -130,6 +130,12 @@ defmodule Mandarin.Naming do
     Inflex.singularize(string)
   end
 
+  def pluralize(singular) do
+    singular
+    |> to_string()
+    |> Inflex.pluralize()
+  end
+
   @doc """
   ...
   """

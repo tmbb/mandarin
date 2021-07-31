@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Mandarin do
 
   @moduledoc """
   Prints Mandarin tasks and their information.
-
+  
       mix mandarin
   """
 

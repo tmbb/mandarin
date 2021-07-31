@@ -14,6 +14,17 @@ defmodule Mix.Mandarin.Schema do
             attrs: [],
             string_attr: nil,
             plural: nil,
+            # Pluralized is the pluralized form of the resource,
+            # NOT the user-given plural which is assumed to be the
+            # name of the database table...
+            # Using the plural for the database name was a very bad
+            # choice on the part of the Phoenix developpers, but
+            # since it's an established convention we should keep it
+            # anyway.
+            #
+            # This means that if we want to have a resource that doesn't
+            # have the same name as the table we need to add our own plural.
+            pluralized: nil,
             singular: nil,
             uniques: [],
             assocs: [],
@@ -22,6 +33,8 @@ defmodule Mix.Mandarin.Schema do
             defaults: [],
             human_singular: nil,
             human_plural: nil,
+            # The same as above
+            human_pluralized: nil,
             binary_id: false,
             migration_defaults: nil,
             migration?: false,
@@ -82,6 +95,9 @@ defmodule Mix.Mandarin.Schema do
       |> List.last()
       |> Mandarin.Naming.underscore()
 
+    pluralized = Mandarin.Naming.pluralize(singular)
+    human_pluralized = Mandarin.Naming.humanize(schema_plural)
+
     string_attr = string_attr(types)
     create_params = params(attrs, :create)
 
@@ -102,6 +118,7 @@ defmodule Mix.Mandarin.Schema do
       file: file,
       attrs: attrs,
       plural: schema_plural,
+      pluralized: pluralized,
       singular: singular,
       assocs: assocs,
       types: types,
@@ -110,6 +127,7 @@ defmodule Mix.Mandarin.Schema do
       indexes: indexes(table, assocs, uniques),
       human_singular: Mandarin.Naming.humanize(singular),
       human_plural: Mandarin.Naming.humanize(schema_plural),
+      human_pluralized: human_pluralized,
       binary_id: opts[:binary_id],
       migration_defaults: migration_defaults(attrs),
       string_attr: string_attr,

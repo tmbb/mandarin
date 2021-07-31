@@ -27,21 +27,34 @@ defmodule Mandarin.Designer.Timestamp do
     fun.()
     # The function has presumably created a new file
     new_filenames = File.ls!(dir)
-    # Now we want to rename the new file
-    {to_rename, renamed} = find_old_and_new_filename(old_filenames, new_filenames)
+    # Now we want to rename the new file´
+    case find_old_and_new_filename(old_filenames, new_filenames) do
+      {:ok, {to_rename, renamed}} ->
+        # Absolute path of old filename
+        abs_path_to_rename = Path.join(dir, to_rename)
+        # Absolute path of the new filename
+        abs_path_renamed = Path.join(dir, renamed)
+        # Rename the file
+        File.rename!(abs_path_to_rename, abs_path_renamed)
+        # Return the renamed file
+        {:ok, abs_path_renamed}
 
-    abs_path_to_rename = Path.join(dir, to_rename)
-    abs_path_renamed = Path.join(dir, renamed)
-
-    File.rename!(abs_path_to_rename, abs_path_renamed)
+      :error ->
+        :error
+    end
   end
 
   defp find_old_and_new_filename(old_filenames, new_filenames) do
-    new_file_before_rename = find_new_file(old_filenames, new_filenames)
-    new_timestamp = timestamp_for_new_file(old_filenames, new_file_before_rename)
-    new_file_after_rename = replace_timestamp(new_file_before_rename, new_timestamp)
-    # return the pair of filenames
-    {new_file_before_rename, new_file_after_rename}
+    case find_new_file(old_filenames, new_filenames) do
+      {:ok, new_file_before_rename} ->
+        new_timestamp = timestamp_for_new_file(old_filenames, new_file_before_rename)
+        new_file_after_rename = replace_timestamp(new_file_before_rename, new_timestamp)
+        # return the pair of filenames
+        {:ok, {new_file_before_rename, new_file_after_rename}}
+
+      :error ->
+        :error
+    end
   end
 
   defp timestamp_for_new_file(old_filenames, new_file) do
@@ -73,7 +86,7 @@ defmodule Mandarin.Designer.Timestamp do
 
   defp replace_timestamp(filename, new_timestamp) do
     Assertions.assert(timestamp_for_file(filename) != nil)
-    << _old_timestamp :: bytes-size(14) >> <> rest = filename
+    <<_old_timestamp::bytes-size(14)>> <> rest = filename
     new_timestamp <> rest
   end
 
@@ -104,13 +117,18 @@ defmodule Mandarin.Designer.Timestamp do
     new_filenames_set = MapSet.new(new_filenames)
     # Get all new files
     delta = MapSet.difference(new_filenames_set, old_filenames_set)
-    # We should have only a new file, otherwise the correct timestamp
-    # will be ambiguous. Enforce this:
-    Assertions.assert(MapSet.size(delta) == 1)
-    # Extract and return the new file
-    [new_file] = MapSet.to_list(delta)
+    # We should have either a single new file or no new files.
+    # If we have more than one new file, we raise an error:
+    case MapSet.to_list(delta) do
+      [] ->
+        :error
 
-    new_file
+      [new_file] ->
+        {:ok, new_file}
+
+      delta_list ->
+        raise "Found more than one file: #{inspect(delta_list)}."
+    end
   end
 
   defp bump_timestamp(timestamp_string) do
@@ -151,6 +169,6 @@ defmodule Mandarin.Designer.Timestamp do
     {{y, m, d}, {hh, mm, ss}}
   end
 
-  defp pad(i) when i < 10, do: << ?0, ?0 + i >>
+  defp pad(i) when i < 10, do: <<?0, ?0 + i>>
   defp pad(i), do: to_string(i)
 end

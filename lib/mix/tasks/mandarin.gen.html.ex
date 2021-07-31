@@ -98,6 +98,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   use Mix.Task
 
   alias Mandarin.Naming
+  alias Mandarin.Injector
   alias Mix.Mandarin.Context
   alias Mix.Tasks.Mandarin.Gen
   require EEx
@@ -123,13 +124,35 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     ]
 
     paths = Mix.Mandarin.generator_paths()
-
     prompt_for_conflicts(context)
+    routes_injection_result = inject_routes(context)
 
-    context
-    |> maybe_add_links_to_sidebar()
-    |> copy_new_files(paths, binding)
-    |> print_shell_instructions()
+    new_context =
+      context
+      |> maybe_add_links_to_sidebar()
+      |> copy_new_files(paths, binding)
+
+    # Now we tell the user which manual steps are required.
+    # The only step that might require manual intervention is adding
+    # the new routes to the router, but in the usual case this
+    # step is not required because Mandarin is smart enough to add
+    # the routes in the right place
+    print_shell_instructions(new_context, routes_injection_result)
+  end
+
+  @spec inject_routes(Context.t()) :: Injector.file_injection_result()
+  defp inject_routes(%Context{schema: schema, context_app: ctx_app} = context) do
+    ctx_web_path = Mix.Mandarin.web_path(ctx_app)
+    router_path = "#{ctx_web_path}/router.ex"
+    routes_marker = "# %% Mandarin Routes - #{inspect(context.alias)} %%"
+
+    routes_code = """
+    # Routes for #{inspect(context.alias)}.#{inspect(schema.alias)}
+    get "/#{schema.singular}/select", #{inspect(schema.alias)}Controller, :select
+    resources "/#{schema.singular}", #{inspect(schema.alias)}Controller\
+    """
+
+    Injector.inject_below_in_file(router_path, routes_marker, routes_code)
   end
 
   @links_end "\n  <%# %% Resource Links - END %% %>"
@@ -212,6 +235,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
     controller_path = Path.join(feature_dir, "#{schema.singular}_controller.ex")
     view_path = Path.join(feature_dir, "#{schema.singular}_view.ex")
+
     controller_test_path =
       Path.join([
         test_prefix,
@@ -227,7 +251,6 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         output_path = Path.join(template_dir, filename)
         {:eex, filename, output_path}
       end
-
 
     [
       {:eex, "controller.ex", controller_path},
@@ -245,26 +268,68 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   end
 
   @doc false
-  def print_shell_instructions(%Context{schema: schema, context_app: ctx_app} = context) do
+  def print_shell_instructions(%Context{schema: schema, context_app: ctx_app} = context, :ok) do
+    # We were able to add the routes automatically
     ctx_web_path = Mix.Mandarin.web_path(ctx_app)
+
     Mix.shell().info("""
+
+    Mandarin has added the resource to your #{schema.web_namespace} :browser scope in #{ctx_web_path}/router.ex:
+
+    #{scope_code(context)}
+
+    You probably want to put these routes behind some kind of authentication.
+    """)
+  end
+
+  def print_shell_instructions(
+        %Context{schema: schema, context_app: ctx_app} = context,
+        :marker_not_found
+      ) do
+    # We were unable to add the routes automatically
+    ctx_web_path = Mix.Mandarin.web_path(ctx_app)
+
+    Mix.shell().info("""
+
+    Mandarin couldn't add the new routes to your router. You'll need to add them yourself.
 
     Add the resource to your #{schema.web_namespace} :browser scope in #{ctx_web_path}/router.ex:
 
+    #{scope_code(context)}
+
+    You probably want to put these routes behind some kind of authentication.
+
+    """)
+  end
+
+  def print_shell_instructions(
+        _context,
+        :already_injected
+      ) do
+    # No need to add new routes because they were already there
+    Mix.shell().info("""
+
+    Mandarin didn't add new routes to your router because they were already there.
+    If you haven't done so already, you might want to put these routes behind some kind of authentication.
+
+    """)
+  end
+
+  defp scope_code(%Context{schema: schema} = context) do
+    """
         scope "/#{schema.web_path}", #{inspect(context.basename)}, as: :#{context.basename} do
           pipe_through([:browser, :#{context.basename}_layout])
           ...
-      #{routes_for_context(context)}
+          get "/#{schema.pluralized}/select", #{inspect(schema.alias)}Controller, :select
+          resources "/#{schema.pluralized}", #{inspect(schema.alias)}Controller
         end
-
-    You probably want to add some authentication to these routes.
-    """)
+    """
   end
 
   def routes_for_context(%Context{schema: schema} = _context) do
     """
-        get "/#{schema.plural}/select", #{inspect(schema.alias)}Controller, :select
-        resources "/#{schema.plural}", #{inspect(schema.alias)}Controller
+        get "/#{schema.pluralized}/select", #{inspect(schema.alias)}Controller, :select
+        resources "/#{schema.pluralized}", #{inspect(schema.alias)}Controller
     """
   end
 
@@ -352,9 +417,8 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
     assocs =
       Enum.map(schema.assocs, fn
-        {key, _atom_singular_id, _full_module_name, atom_plural} ->
-          path_part = Naming.singularize(atom_plural)
-          path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
+        {key, atom_singular_id, _full_module_name, _atom_plural} ->
+          path = "Routes.#{context.basename}_#{atom_singular_id}_path(@conn, :select)"
 
           """
             <%= forage_form_group(f, :previous_diseases, #{i18n_label_for(context, key)},
@@ -424,9 +488,8 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
     assocs =
       Enum.map(schema.assocs, fn
-        {key, _atom_singular_id, _full_module_name, atom_plural} ->
-          path_part = Naming.singularize(atom_plural)
-          path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
+        {key, atom_singular_id, _full_module_name, _atom_plural} ->
+          path = "Routes.#{context.basename}_#{atom_singular_id}_path(@conn, :select)"
 
           {label(key),
            ~s'''
@@ -471,9 +534,8 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
       end)
 
     assoc_filters =
-      Enum.map(schema.assocs, fn {key, _atom_singular_id, _full_module_name, atom_plural} ->
-        path_part = Naming.singularize(atom_plural)
-        path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
+      Enum.map(schema.assocs, fn {key, atom_singular_id, _full_module_name, _atom_plural} ->
+        path = "Routes.#{context.basename}_#{atom_singular_id}_path(@conn, :select)"
 
         """
           <%= forage_horizontal_form_group #{inspect(key)} do %>

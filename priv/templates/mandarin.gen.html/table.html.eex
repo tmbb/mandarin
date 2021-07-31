@@ -1,3 +1,8 @@
+<%%# Icon definitions - to use in all table rows %>
+<%% show_icon = content_tag(:i, "", class: "fas fa-eye", title: dgettext("mandarin.<%= context.basename %>", "Show")) %>
+<%% edit_icon = content_tag(:i, "", class: "fas fa-edit", title: dgettext("mandarin.<%= context.basename %>", "Edit")) %>
+<%% delete_icon = content_tag(:i, "", class: "fas fa-trash", title: dgettext("mandarin.<%= context.basename %>", "Delete")) %>
+
 <table class="table">
   <thead>
     <tr>
@@ -8,12 +13,11 @@
     </tr>
   </thead>
   <tbody>
-<%%= for <%= schema.singular %> <- @<%= schema.plural %>.entries do %>
+<%%= for <%= schema.singular %> <- @<%= schema.pluralized %>.entries do %>
     <tr>
 <%= for {key, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}] do %>      <td><%%= <%= schema.singular %>.<%= key %> %></td>
-<% end %><%= for {key, _atom_singular_id, _full_module_name, atom_plural} <- schema.assocs do %><%
-  path_part = Mandarin.Naming.singularize(atom_plural)
-  path = "Routes.#{context.basename}_#{path_part}_path"
+<% end %><%= for {key, atom_singular_id, _full_module_name, _atom_plural} <- schema.assocs do %><%
+  path = "Routes.#{context.basename}_#{atom_singular_id}_path"
 %>      <td>
         <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>.id) %>">
           <%%= forage_as_html(<%= schema.singular %>.<%= key %>) %>
@@ -21,10 +25,6 @@
       </td>
 <% end %>
       <td>
-        <%%# Icon definitions %>
-        <%% show_icon = content_tag(:i, "", class: "fas fa-eye", title: dgettext("mandarin.<%= context.basename %>", "Show")) %>
-        <%% edit_icon = content_tag(:i, "", class: "fas fa-edit", title: dgettext("mandarin.<%= context.basename %>", "Edit")) %>
-        <%% delete_icon = content_tag(:i, "", class: "fas fa-trash", title: dgettext("mandarin.<%= context.basename %>", "Delete")) %>
         <%%# Links %>
         <div class="pull-right">
           <%%= link show_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :show, <%= schema.singular %>) %> &nbsp;

@@ -26,7 +26,7 @@ defmodule Mandarin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix, "~> 1.5"},
+      # {:phoenix, "~> 1.5"},
       {:forage, "~> 0.4"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},

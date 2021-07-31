@@ -2,18 +2,18 @@
   alias <%= inspect schema.module %>
 
   @doc """
-  Returns a filtered list of <%= schema.plural %>.
+  Returns a filtered list of <%= schema.pluralized %>.
 
   The list is filtered by `params["_filter"]`, sorted by `params["_sort"]
   and paginated according to `params["_pagination"].
 
   ## Examples
 
-      iex> list_<%= schema.plural %>(params)
+      iex> list_<%= schema.pluralized %>(params)
       [%<%= inspect schema.alias %>{}, ...]
 
   """
-  def list_<%= schema.plural %>(params) do<%
+  def list_<%= schema.pluralized %>(params) do<%
       maybe_default_sort_field = Mix.Mandarin.Schema.maybe_default_sort_field(schema)
       sort_fields = maybe_default_sort_field ++ [:id]
     %>
@@ -21,19 +21,19 @@
   end
 
   @doc """
-  Runs a search query on <%= schema.plural %>.
+  Runs a search query on <%= schema.pluralized %>.
 
   ## Examples
 
-      iex> search_<%= schema.plural %>(params)
+      iex> search_<%= schema.pluralized %>(params)
       [%<%= inspect schema.alias %>{}, ...]
 
   """<% search_field = Mix.Mandarin.Schema.default_search_field(schema) %><%= if search_field do %>
-  def search_<%= schema.plural %>(params) do
+  def search_<%= schema.pluralized %>(params) do
     search_params = Forage.naive_search_params(params, :<%= search_field %>)
     Forage.paginate(search_params, <%= inspect schema.alias %>, Repo, sort: <%= inspect(sort_fields) %>)
   end<% else %>
-  def search_<%= schema.plural %>(_params) do
+  def search_<%= schema.pluralized %>(_params) do
     raise UndefinedFunctionError, "<%= inspect(schema.alias) %> doesn't have a string field that can be used for for search"
   end<% end %>
 

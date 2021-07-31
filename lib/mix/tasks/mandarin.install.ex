@@ -10,6 +10,7 @@ defmodule Mix.Tasks.Mandarin.Install do
 
   alias Mix.Mandarin.Install
   alias Mandarin.Naming
+  alias Mandarin.Injector
 
   @switches [web: :string]
 
@@ -78,10 +79,31 @@ defmodule Mix.Tasks.Mandarin.Install do
     router_path = Path.join([install.web_path, "router.ex"])
 
     if File.exists?(router_path) do
-      _router_contents = File.read!(router_path)
-
+      # Generate the code we'll inject:
       pipeline_and_scope = new_pipeline_and_scope(install)
-      inject_eex_before_final_end(pipeline_and_scope, router_path)
+
+      # We should only add the pipeline and scope to the router if they don't exist already.
+      # To detect whether they already exist, we will match the first non-empty line in the injected code.
+      # Hopefully that line will be unique enough for our purposes.
+
+      # Get the first non-empty line of the inhected code
+      pipeline_start =
+        pipeline_and_scope
+        |> String.trim_leading()
+        |> String.split("\n")
+        |> Enum.at(0)
+
+      # Only inject the code if the file doesn't contain the start of the pipeline
+      router_contents = File.read!(router_path)
+      case String.contains?(router_contents, pipeline_start) do
+        true ->
+          Injector.inject_before_final_end(pipeline_and_scope, router_path)
+
+        false ->
+          Mix.shell().info("""
+          Mandarin didn't inject a pipeline and scope for the curent context because they already exist.
+          """)
+      end
     else
       Mix.shell().info("""
       No "#{router_path}" file was found.
@@ -97,7 +119,7 @@ defmodule Mix.Tasks.Mandarin.Install do
     if File.exists?(repo_path) do
       unless String.contains?(repo_contents, "\n  use Paginator") do
         use_paginator = "\n  use Paginator\n"
-        inject_eex_before_final_end(use_paginator, repo_path)
+        Injector.inject_before_final_end(use_paginator, repo_path)
       end
     else
       Mix.shell().info("""
@@ -106,26 +128,24 @@ defmodule Mix.Tasks.Mandarin.Install do
     end
   end
 
-  defp inject_eex_before_final_end(content_to_inject, file_path) do
-    file = File.read!(file_path)
+  # def inject_eex_before_final_end(content_to_inject, file_path) do
+  #   file = File.read!(file_path)
 
-    if String.contains?(file, String.trim(content_to_inject)) do
-      :ok
-    else
-      Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
+  #   if String.contains?(file, String.trim(content_to_inject)) do
+  #     :ok
+  #   else
+  #     Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
 
-      file
-      |> String.trim_trailing()
-      |> String.trim_trailing("end")
-      |> Kernel.<>(content_to_inject)
-      |> Kernel.<>("end\n")
-      |> write_file(file_path)
-    end
-  end
+  #     file
+  #     |> String.trim_trailing()
+  #     |> String.trim_trailing("end")
+  #     |> Kernel.<>(content_to_inject)
+  #     |> Kernel.<>("end\n")
+  #     |> write_file(file_path)
+  #     |> Mix.Mandarin.maybe_format_code(file_path)
+  #   end
+  # end
 
-  defp write_file(content, file) do
-    File.write!(file, content)
-  end
 
   # Path to the sidebar template
   # This path must be accessible from outside this module
@@ -158,16 +178,15 @@ defmodule Mix.Tasks.Mandarin.Install do
     index_view_path = Path.join(index_feature_dir, "index_view.ex")
     index_template_path = Path.join([index_feature_dir, "templates", "index.html.eex"])
 
-
     layout_feature_dir = Path.join(group_dir, "_layout")
     layout_view_path = Path.join(layout_feature_dir, "layout_view.ex")
     layout_templates_dir = Path.join(layout_feature_dir, "templates")
     layout_layout_template_path = Path.join(layout_templates_dir, "layout.html.eex")
     layout_sidebar_template_path = sidebar_path(context_app, install.context_underscore)
 
+    # Only generate this file if it doesn't exist already
+    # (it's quite likely that the user will want to customize this file)
     maybe_mandarin_web =
-      # Only generate this file if it doesn't exist already
-      # (it's quite likely that the user will want to customize this file)
       case File.exists?(mandarin_web_path) do
         # The file that will allow Mandarin to use "vertical slices" even if the rest
         # of the application uses the (IMO inferior) horizontal slices.
@@ -183,7 +202,7 @@ defmodule Mix.Tasks.Mandarin.Install do
       # Files related to the "layout" page for a mandarin CRUD interface
       {:eex, "layout_view.ex", layout_view_path},
       {:eex, "layout.html.eex", layout_layout_template_path},
-      {:eex, "sidebar.html.eex", layout_sidebar_template_path},
+      {:eex, "sidebar.html.eex", layout_sidebar_template_path}
     ] ++ maybe_mandarin_web
   end
 
@@ -216,8 +235,7 @@ defmodule Mix.Tasks.Mandarin.Install do
     files =
       for {_eex, file, path} <- files_to_be_generated(install), into: %{} do
         {file, path}
-    end
-
+      end
 
     Mix.shell().info("""
     The following files have been generated:
@@ -237,7 +255,6 @@ defmodule Mix.Tasks.Mandarin.Install do
 
       * "#{files["index_controller.ex"]}"
           - the controller for the index page
-
 
       * "#{files["index.html.eex"]}"
           - the template for the index page

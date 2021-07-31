@@ -29,6 +29,7 @@ defmodule Mandarin.Designer do
   @spec update_options(list(Params.t()), Keyword.t()) :: list(Params.t())
   def update_options(list_of_params, options) do
     options_map = Map.new(options)
+
     for params <- list_of_params do
       Map.merge(params, options_map)
     end
@@ -59,21 +60,21 @@ defmodule Mandarin.Designer do
 
         :ok
     end
-
   end
 
   defp check_exactly_2_markers(markers) do
     case length(markers) do
       0 ->
         Logger.warn("""
-          drop_migrations/2 expects exactly 2 marker files with the given tag; no markers were found
-          """)
+        drop_migrations/2 expects exactly 2 marker files with the given tag; no markers were found
+        """)
 
         :error
+
       1 ->
         Logger.warn("""
-          drop_migrations/2 expects exactly 2 marker files with the given tag; only 1 marker was found
-          """)
+        drop_migrations/2 expects exactly 2 marker files with the given tag; only 1 marker was found
+        """)
 
         :error
 
@@ -82,8 +83,8 @@ defmodule Mandarin.Designer do
 
       n ->
         Logger.warn("""
-          drop_migrations/2 expects exactly 2 marker files with the given tag; #{n} markers were found
-          """)
+        drop_migrations/2 expects exactly 2 marker files with the given tag; #{n} markers were found
+        """)
 
         :error
     end
@@ -112,14 +113,18 @@ defmodule Mandarin.Designer do
   to make it descriptive.
   """
   def with_ecto_design_markers(migrations_path \\ @migrations_path, tag, fun) do
-    begin_file_name = Path.join(migrations_path, "#{Timestamp.timestamp()}__begin_ecto_designer__#{tag}__.txt")
+    begin_file_name =
+      Path.join(migrations_path, "#{Timestamp.timestamp()}__begin_ecto_designer__#{tag}__.txt")
+
     Timestamp.with_timestamp_update_if_needed(migrations_path, fn ->
       File.write!(begin_file_name, @migrations_begin_marker_contents)
     end)
 
     fun.()
 
-    end_file_name = Path.join(migrations_path, "#{Timestamp.timestamp()}__end_ecto_designer__#{tag}__.txt")
+    end_file_name =
+      Path.join(migrations_path, "#{Timestamp.timestamp()}__end_ecto_designer__#{tag}__.txt")
+
     Timestamp.with_timestamp_update_if_needed(migrations_path, fn ->
       File.write!(end_file_name, @migrations_end_marker_contents)
     end)
@@ -144,6 +149,7 @@ defmodule Mandarin.Designer do
     Timestamp.with_timestamp_update_if_needed(migrations_path, fn ->
       Mix.Tasks.Mandarin.Gen.Schema.run([schema_name] ++ args)
     end)
+
     :ok
   end
 
@@ -159,6 +165,7 @@ defmodule Mandarin.Designer do
     Timestamp.with_timestamp_update_if_needed(migrations_path, fn ->
       Mix.Tasks.Mandarin.Gen.Context.run([context, name] ++ args)
     end)
+
     :ok
   end
 
@@ -185,6 +192,7 @@ defmodule Mandarin.Designer do
     Timestamp.with_timestamp_update_if_needed(migrations_path, fn ->
       Mix.Tasks.Mandarin.Gen.Html.run([context, name] ++ args)
     end)
+
     :ok
   end
 
@@ -194,7 +202,8 @@ defmodule Mandarin.Designer do
   If the any params belong to a `join_through` table, this will run
   `generate_mandarin_schema(params)` for those params.
   """
-  def generate_mandarin_html_for_all(migrations_path \\ @migrations_path, tag, list_of_params) when tag != "" do
+  def generate_mandarin_html_for_all(migrations_path \\ @migrations_path, tag, list_of_params)
+      when tag != "" do
     with_ecto_design_markers(tag, fn ->
       for params <- list_of_params do
         generate_mandarin_html(migrations_path, params)
@@ -244,12 +253,12 @@ defmodule Mandarin.Designer do
       end
 
     maybe_migration =
-      case params.generate_migrations? do
+      case params.generate_migration? do
         true -> []
         false -> ["--no-migration"]
       end
 
     fields = make_fields(params.fields)
-    [params.table] ++ maybe_binary_id ++ maybe_migration ++ fields
+    [params.table] ++ fields ++ maybe_binary_id ++ maybe_migration
   end
 end

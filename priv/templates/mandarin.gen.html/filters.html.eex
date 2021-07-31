@@ -1,9 +1,8 @@
 <h4><%%= dgettext("mandarin.<%= context.basename %>", "Search filters") %></h4>
 
 <%%= <%= context.basename %>_<%= schema.singular %>_filter_form_for @conn, [], fn f -> %>
-<%= for filter <- filters, filter do %>
-<%= filter %>
-<% end %>
-  <%% search_button_content = [content_tag(:i, "", class: "fas fa-search"), dgettext("mandarin.<%= context.basename %>", " Search")] %>
+<%= for filter <- filters, filter do %><%= filter %>
+
+<% end %>  <%% search_button_content = [content_tag(:i, "", class: "fas fa-search"), dgettext("mandarin.<%= context.basename %>", " Search")] %>
   <%%= submit search_button_content, class: "btn btn-block btn-primary" %>
 <%% end %>

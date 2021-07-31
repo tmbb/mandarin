@@ -7,5 +7,6 @@
     pipe_through([:browser, :<%= install.context_underscore %>_layout])
     # Add your routes here
     get "/", IndexController, :index
-    # %% Mandarin Routes %%
+    # Routes will be added below the next line (don't delete it):
+    # %% Mandarin Routes - <%= install.context_camel_case %> %%
   end

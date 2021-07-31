@@ -2,15 +2,15 @@
   alias <%= inspect schema.module %>
 
   @doc """
-  Returns the list of <%= schema.plural %>.
+  Returns the list of <%= schema.pluralized %>.
 
   ## Examples
 
-      iex> list_<%= schema.plural %>()
+      iex> list_<%= schema.pluralized %>()
       [%<%= inspect schema.alias %>{}, ...]
 
   """
-  def list_<%= schema.plural %> do
+  def list_<%= schema.pluralized %> do
     raise "TODO"
   end
 

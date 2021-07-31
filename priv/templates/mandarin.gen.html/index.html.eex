@@ -1,6 +1,6 @@
 <h1>
-  <%%= dgettext("mandarin.<%= context.basename %>", "<%= schema.human_plural %>") %>
-  <small><%%= dgettext("mandarin.<%= context.basename %>", "(Browse <%= schema.human_plural %>)") %></small>
+  <%%= dgettext("mandarin.<%= context.basename %>", "<%= schema.human_pluralized %>") %>
+  <small><%%= dgettext("mandarin.<%= context.basename %>", "(Browse <%= schema.human_pluralized %>)") %></small>
 </h1>
 
 <%% new_link_content = [content_tag(:i, "", class: "fas fa-plus"), dgettext("mandarin.<%= context.basename %>", " Create New")] %>

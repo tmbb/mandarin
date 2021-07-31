@@ -75,6 +75,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     table: :string,
     web: :string,
     schema: :boolean,
+    migration: :boolean,
     context: :boolean,
     context_app: :string,
     quiet: :boolean,
@@ -98,8 +99,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
       prompt_for_code_injection(context)
     end
 
-    new_context =
-      copy_new_files(context, paths, binding)
+    new_context = copy_new_files(context, paths, binding)
 
     unless context.quiet do
       print_shell_instructions(new_context)
@@ -165,7 +165,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
       )
     end
 
-    string_to_test_for = "alias #{inspect schema.module}\n"
+    string_to_test_for = "alias #{inspect(schema.module)}\n"
 
     paths
     |> Mix.Mandarin.eval_from(
@@ -196,7 +196,12 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     |> inject_eex_before_final_end(test_file, binding)
   end
 
-  defp inject_eex_before_final_end(content_to_inject, string_to_test_for \\ nil, file_path, binding) do
+  defp inject_eex_before_final_end(
+         content_to_inject,
+         string_to_test_for \\ nil,
+         file_path,
+         binding
+       ) do
     string_to_test_for = string_to_test_for || content_to_inject
 
     file = File.read!(file_path)

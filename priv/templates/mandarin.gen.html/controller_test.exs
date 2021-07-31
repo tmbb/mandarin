@@ -13,9 +13,9 @@ defmodule <%= inspect context.web_module %>.<%= inspect context.name %>.<%= insp
   end
 
   describe "index" do
-    test "lists all <%= schema.plural %>", %{conn: conn} do
+    test "lists all <%= schema.pluralized %>", %{conn: conn} do
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :index)
-      assert html_response(conn, 200) =~ "Listing <%= schema.human_plural %>"
+      assert html_response(conn, 200) =~ "Browse <%= schema.human_pluralized %>"
     end
   end
 

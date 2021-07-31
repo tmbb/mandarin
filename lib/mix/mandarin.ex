@@ -16,8 +16,10 @@ defmodule Mix.Mandarin do
   defmacro if_can_touch(path, do: body) do
     quote do
       if File.exists?(unquote(path)) and
-          String.contains?(File.read!(unquote(path)), unquote(@mandarin_dont_touch_marker)) do
-        message = "%% MANDARIN:DONT-TOUCH %% - The following path wasn't touched: #{unquote(path)}"
+           String.contains?(File.read!(unquote(path)), unquote(@mandarin_dont_touch_marker)) do
+        message =
+          "%% MANDARIN:DONT-TOUCH %% - The following path wasn't touched: #{unquote(path)}"
+
         Logger.info(message)
         :ok
       else
@@ -43,8 +45,8 @@ defmodule Mix.Mandarin do
     EEx.eval_string(content, binding)
   end
 
-  defp maybe_format_code(text, file_name) do
-    if String.ends_with?(file_name, ".ex") or String.ends_with?(file_name, ".exs")do
+  def maybe_format_code(text, file_name) do
+    if String.ends_with?(file_name, ".ex") or String.ends_with?(file_name, ".exs") do
       Code.format_string!(text)
     else
       text
