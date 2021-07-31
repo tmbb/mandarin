@@ -96,6 +96,7 @@ defmodule Mix.Mandarin.Schema do
       |> Mandarin.Naming.underscore()
 
     pluralized = Mandarin.Naming.pluralize(singular)
+
     human_pluralized = Mandarin.Naming.humanize(schema_plural)
 
     string_attr = string_attr(types)

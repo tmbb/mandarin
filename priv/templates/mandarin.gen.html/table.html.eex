@@ -19,9 +19,11 @@
 <% end %><%= for {key, atom_singular_id, _full_module_name, _atom_plural} <- schema.assocs do %><%
   path = "Routes.#{context.basename}_#{atom_singular_id}_path"
 %>      <td>
-        <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>.id) %>">
-          <%%= forage_as_html(<%= schema.singular %>.<%= key %>) %>
-        </a>
+        <%%= if <%= schema.singular %>.<%= key %> do %>
+          <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>.id) %>">
+            <%%= forage_as_html(<%= schema.singular %>.<%= key %>) %>
+          </a>
+        <%% end %>
       </td>
 <% end %>
       <td>
