@@ -69,6 +69,7 @@
     %<%= inspect schema.alias %>{}
     |> <%= inspect schema.alias %>.changeset(attrs)
     |> Repo.insert()
+    |> Forage.preload_in_result(Repo, <%= inspect(preload) %>)
   end
 
   @doc """
@@ -87,6 +88,7 @@
     <%= schema.singular %>
     |> <%= inspect schema.alias %>.changeset(attrs)
     |> Repo.update()
+    |> Forage.preload_in_result(Repo, <%= inspect(preload) %>)
   end
 
   @doc """
