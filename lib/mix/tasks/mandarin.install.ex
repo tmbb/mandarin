@@ -92,14 +92,15 @@ defmodule Mix.Tasks.Mandarin.Install do
         |> String.trim_leading()
         |> String.split("\n")
         |> Enum.at(0)
+        |> String.trim()
 
       # Only inject the code if the file doesn't contain the start of the pipeline
       router_contents = File.read!(router_path)
       case String.contains?(router_contents, pipeline_start) do
-        true ->
+        false ->
           Injector.inject_before_final_end(pipeline_and_scope, router_path)
 
-        false ->
+        true ->
           Mix.shell().info("""
           Mandarin didn't inject a pipeline and scope for the curent context because they already exist.
           """)

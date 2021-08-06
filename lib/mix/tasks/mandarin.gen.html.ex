@@ -421,7 +421,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
           path = "Routes.#{context.basename}_#{atom_singular_id}_path(@conn, :select)"
 
           """
-            <%= forage_form_group(f, :previous_diseases, #{i18n_label_for(context, key)},
+            <%= forage_form_group(f, :#{atom_singular_id}, #{i18n_label_for(context, key)},
                   &forage_select(&1, &2, path: #{path})) %>
           """
       end)
@@ -513,7 +513,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
             :text -> :text
             :string -> :text
             :date -> :date
-            :time -> :numeric
+            :time -> :time
             :utc_datetime -> :numeric
             :naive_datetime -> :numeric
             _ -> nil

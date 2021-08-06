@@ -16,13 +16,16 @@ defmodule Mandarin.Injector do
     else
       Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
 
-      file
-      |> String.trim_trailing()
-      |> String.trim_trailing("end")
-      |> Kernel.<>(content_to_inject)
-      |> Kernel.<>("end\n")
-      |> write_file(file_path)
-      |> maybe_format_code(file_path)
+      content =
+        file
+        |> String.trim_trailing()
+        |> String.trim_trailing("end")
+        |> Kernel.<>(content_to_inject)
+        |> Kernel.<>("end\n")
+
+      formatted_content = maybe_format_code(content, file_path)
+
+      File.write!(file_path, formatted_content)
     end
   end
 
