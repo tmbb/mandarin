@@ -20,7 +20,7 @@
   path = "Routes.#{context.basename}_#{atom_singular_id}_path"
 %>      <td>
         <%%= if <%= schema.singular %>.<%= key %> do %>
-          <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>.id) %>">
+          <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>) %>">
             <%%= forage_as_html(<%= schema.singular %>.<%= key %>) %>
           </a>
         <%% end %>
@@ -28,10 +28,11 @@
 <% end %>
       <td>
         <%%# Links %>
-        <div class="pull-right">
-          <%%= link show_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :show, <%= schema.singular %>) %> &nbsp;
-          <%%= link edit_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, <%= schema.singular %>) %> &nbsp;
-          <%%= link delete_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :delete, <%= schema.singular %>, @conn.params), method: :delete, data: [confirm: dgettext("mandarin.<%= context.basename %>", "Are you sure?")], class: "text-danger" %>
+        <div class="text-right text-nowrap">
+          <%%= link show_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :show, <%= schema.singular %>) %>&nbsp;
+          <%%= link edit_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, <%= schema.singular %>) %>&nbsp;
+          <%%= link delete_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :delete, <%= schema.singular %>),
+                  method: :delete, data: [confirm: dgettext("mandarin.<%= context.basename %>", "Are you sure?")], class: "text-danger" %>
         </div>
       </td>
     </tr>

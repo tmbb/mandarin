@@ -11,6 +11,8 @@ defmodule <%= inspect schema.module %> do<%
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id<% end %>
 
+  @derive Phoenix.Param
+
   schema <%= inspect schema.table %> do
 <%= for {k, v} <- schema.types do %>    field <%= inspect k %>, <%= inspect v %><%= schema.defaults[k] %>
 <% end %><%= for {_, k, string_alias, table_name_atom} <- schema.assocs do %><%

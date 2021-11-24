@@ -152,7 +152,7 @@ defmodule Mandarin.Injector do
   end
 
   @spec write_file(String.t(), Path.t()) :: :ok
-  defp write_file(content, file) do
+  def write_file(content, file) do
     File.write!(file, content)
   end
 end

@@ -17,7 +17,8 @@
 
     test "list_<%= schema.pluralized %>/0 returns all <%= schema.pluralized %>" do
       <%= schema.singular %> = <%= schema.singular %>_fixture()
-      assert <%= inspect context.alias %>.list_<%= schema.pluralized %>() == [<%= schema.singular %>]
+      page = <%= inspect context.alias %>.list_<%= schema.pluralized %>(%{})
+      assert page.entries == [<%= schema.singular %>]
     end
 
     test "get_<%= schema.singular %>!/1 returns the <%= schema.singular %> with given id" do

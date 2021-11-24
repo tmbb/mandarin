@@ -12,7 +12,14 @@ defmodule Mandarin.MixProject do
       description: description(),
       package: package(),
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      docs: [
+        main: "readme",
+        extras: [
+          "README.md",
+          "guides/backoffice_demo.md"
+        ]
+      ]
     ]
   end
 

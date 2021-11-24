@@ -354,64 +354,90 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
         {key, :integer} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_number_input/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_text_input/3) %>\
           """
 
         {key, :float} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_number_input/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_text_input/3) %>\
           """
 
         {key, :decimal} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_number_input/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_text_input/3) %>\
           """
 
         {key, :boolean} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_checkbox/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_checkbox/3) %>\
           """
 
         {key, :text} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_textarea/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_textarea/3) %>\
           """
 
         {key, :date} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_date_input/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_date_input/3) %>\
           """
 
         {key, :time} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_time_select/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_time_select/3) %>\
           """
 
         {key, :utc_datetime} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_datetime_select/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_datetime_select/3) %>\
           """
 
         {key, :naive_datetime} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_datetime_select/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_datetime_select/3) %>\
           """
 
         {key, {:array, :integer}} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)},
-                  &multiple_select(&1, &2, ["1": 1, "2": 2], class: "form-control")) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  fn form, field, _opts ->
+                    multiple_select(form, field, ["1": 1, "2": 2], class: "form-control")
+                  end) %>\
           """
 
         {key, {:array, _}} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)},
-                  &multiple_select(&1, &2, ["Option 1": "option1", "Option 2": "option2"], class: "form-control")) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  fn form, field, _opts ->
+                    multiple_select(&1, &2, ["Option 1": "option1", "Option 2": "option2"], class: "form-control")
+                  end) %>\
           """
 
         {key, _} ->
           """
-            <%= forage_form_group(f, #{inspect(key)}, #{i18n_label_for(context, key)}, &forage_text_input/2) %>
+            <%= forage_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)},
+                  &forage_text_input/3) %>\
           """
       end)
 
@@ -421,84 +447,17 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
           path = "Routes.#{context.basename}_#{atom_singular_id}_path(@conn, :select)"
 
           """
-            <%= forage_form_group(f, :#{atom_singular_id}, #{i18n_label_for(context, key)},
-                  &forage_select(&1, &2, path: #{path})) %>
+            <%= forage_form_group(f, :#{atom_singular_id},
+                  #{i18n_label_for(context, key)},
+                  fn form, field, opts ->
+                    forage_select(form, field, #{path}, opts)
+                  end) %>\
           """
       end)
 
     attrs ++ assocs
   end
 
-  @doc false
-  def old_inputs(%Context{schema: schema} = context) do
-    attrs =
-      Enum.map(schema.attrs, fn
-        {_, {:references, _}} ->
-          {nil, nil, nil}
-
-        {key, :integer} ->
-          {label(key), ~s(<%= number_input f, #{inspect(key)}, class: "form-control" %>),
-           error(key)}
-
-        {key, :float} ->
-          {label(key),
-           ~s(<%= number_input f, #{inspect(key)}, step: "any", class: "form-control" %>),
-           error(key)}
-
-        {key, :decimal} ->
-          {label(key),
-           ~s(<%= number_input f, #{inspect(key)}, step: "any", class: "form-control" %>),
-           error(key)}
-
-        {key, :boolean} ->
-          {label(key), ~s(<%= checkbox f, #{inspect(key)} %>), error(key)}
-
-        {key, :text} ->
-          {label(key), ~s(<%= textarea f, #{inspect(key)}, class: "form-control" %>), error(key)}
-
-        {key, :date} ->
-          {label(key), ~s(<%= forage_date_input f, #{inspect(key)}, class: "form-control" %>),
-           error(key)}
-
-        {key, :time} ->
-          {label(key), ~s(<%= time_select f, #{inspect(key)}, class: "form-control" %>),
-           error(key)}
-
-        {key, :utc_datetime} ->
-          {label(key), ~s(<%= datetime_select f, #{inspect(key)}, class: "form-control" %>),
-           error(key)}
-
-        {key, :naive_datetime} ->
-          {label(key), ~s(<%= datetime_select f, #{inspect(key)}, class: "form-control" %>),
-           error(key)}
-
-        {key, {:array, :integer}} ->
-          {label(key), ~s(<%= multiple_select f, #{inspect(key)}, ["1": 1, "2": 2] %>),
-           error(key)}
-
-        {key, {:array, _}} ->
-          {label(key),
-           ~s(<%= multiple_select f, #{inspect(key)}, ["Option 1": "option1", "Option 2": "option2"] %>),
-           error(key)}
-
-        {key, _} ->
-          {label(key), ~s(<%= text_input f, #{inspect(key)}, class: "form-control" %>),
-           error(key)}
-      end)
-
-    assocs =
-      Enum.map(schema.assocs, fn
-        {key, atom_singular_id, _full_module_name, _atom_plural} ->
-          path = "Routes.#{context.basename}_#{atom_singular_id}_path(@conn, :select)"
-
-          {label(key),
-           ~s'''
-           <%= forage_select f, :#{key}, path: #{path} %>\
-           ''', error(key)}
-      end)
-
-    attrs ++ assocs
-  end
 
   defp filters(%Context{schema: schema} = context) do
     simple_filters =
@@ -523,12 +482,25 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
           nil ->
             ""
 
-          other when other in [:numeric, :date, :text] ->
-            # Indent the text here becuase it's easier than indenting it in the template
+          :numeric ->
             """
-              <%= forage_horizontal_form_group #{inspect(key)} do %>
-                <%= forage_#{other}_filter(f, #{inspect(key)}) %>
-              <% end %>\
+              <%= forage_horizontal_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)}, [],
+                  &forage_text_filter/3) %>\
+            """
+
+          :date ->
+            """
+              <%= forage_horizontal_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)}, [],
+                  &forage_date_filter/3) %>\
+            """
+
+          :text ->
+            """
+              <%= forage_horizontal_form_group(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)}, [],
+                  &forage_text_filter/3) %>\
             """
         end
       end)
@@ -538,20 +510,14 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         path = "Routes.#{context.basename}_#{atom_singular_id}_path(@conn, :select)"
 
         """
-          <%= forage_horizontal_form_group #{inspect(key)} do %>
-            <%= forage_select_filter f, :#{key}, path: #{path} %>
-          <% end %>\
+          <%= forage_horizontal_form_group(f, #{inspect(key)},
+                #{i18n_label_for(context, key)}, [],
+                fn form, field, opts ->
+                  forage_select_filter(form, field, #{path}, opts)
+                end) %>\
         """
       end)
 
     simple_filters ++ assoc_filters
-  end
-
-  defp label(key) do
-    ~s(<%= label f, #{inspect(key)}, class: "control-label" %>)
-  end
-
-  defp error(field) do
-    ~s(<%= error_tag f, #{inspect(field)} %>)
   end
 end

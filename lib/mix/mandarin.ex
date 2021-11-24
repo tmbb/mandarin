@@ -47,7 +47,8 @@ defmodule Mix.Mandarin do
 
   def maybe_format_code(text, file_name) do
     if String.ends_with?(file_name, ".ex") or String.ends_with?(file_name, ".exs") do
-      Code.format_string!(text)
+      # Code.format_string!(text)
+      text
     else
       text
     end

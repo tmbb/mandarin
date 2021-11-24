@@ -1,5 +1,7 @@
 
   pipeline :<%= install.context_underscore %>_layout do
+    # We won't be using liveviews in our mandarin backend by default:
+    plug(:put_root_layout, false)
     plug(:put_layout, {<%= install.web_module %>.<%= install.context_camel_case %>LayoutView, "layout.html"})
   end
 
