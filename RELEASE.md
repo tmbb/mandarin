@@ -1,37 +1,41 @@
 RELEASE_TYPE: minor
 
-Mandarin now generates web resources accordinf to "vertical slices".
-Instead of having
+Mandarin now generates web resources accordinf to "vertical slices" or "feature folders".
+Instead of having this:
 
-  ```text
-  controllers/
-    ...
-    user_controller.ex
-    ...
-
-  view/
-    ...
-    user_view.ex
-    ...
-
-  templates/
-    ...
-    user/
+```
+🗀 hello_web
+  🗀 controllers
+      foo_controller.ex
+      bar_controller.ex
       ...
-      index.html.eex
-      ...
-  ```
-
-  Manarin will gennerate everything according to the following structure.
-
-  ```text
-  my_context/
-    user/
-      user_controller.ex
-      user_view.ex
-      templates/
-        ...
+  🗀 templates
+    🗀 foo
         index.html.eex
         ...
+    🗀 bar
+        index.html.eex
+        ...
+  🗀 views
+      foo_view.eex
+      bar_view.eex
+      ...
+```
 
-  ```
+You have this:
+
+```
+🗀 hello_web
+    🗀 foo
+        foo_controller.ex
+        foo_view.ex
+        🗀 templates
+            index.html.eex
+            ...
+    🗀 bar
+        bar_controller.ex
+        bar_view.ex
+        🗀 templates
+            index.html.eex
+            ...
+```

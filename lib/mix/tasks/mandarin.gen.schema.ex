@@ -162,13 +162,15 @@ defmodule Mix.Tasks.Mandarin.Gen.Schema do
   @doc false
   def copy_new_files(%Schema{context_app: ctx_app} = schema, paths, binding) do
     files = files_to_be_generated(schema)
+    context_underscore = schema.context_underscore
+
     Mix.Mandarin.copy_from(paths, "priv/templates/mandarin.gen.schema", binding, files)
 
     if schema.migration? do
       migration_path =
         Mix.Mandarin.context_app_path(
           ctx_app,
-          "priv/repo/migrations/#{timestamp()}_create_#{schema.table}.exs"
+          "priv/repo/migrations/#{timestamp()}_create_#{schema.table}__mandarin_#{context_underscore}.exs"
         )
 
       Mix.Mandarin.copy_from(paths, "priv/templates/mandarin.gen.schema", binding, [

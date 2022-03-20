@@ -42,6 +42,7 @@ defmodule Mix.Mandarin.Schema do
             sample_id: nil,
             web_path: nil,
             web_namespace: nil,
+            context_underscore: nil,
             context_app: nil,
             route_helper: nil,
             quiet: nil,
@@ -88,6 +89,7 @@ defmodule Mix.Mandarin.Schema do
     web_path = web_namespace && Mandarin.Naming.underscore(web_namespace)
     embedded? = Keyword.get(opts, :embedded, false)
     generate? = Keyword.get(opts, :schema, true)
+    context_underscore = Keyword.get(opts, :context_underscore)
 
     singular =
       module
@@ -141,6 +143,7 @@ defmodule Mix.Mandarin.Schema do
       web_path: web_path,
       route_helper: route_helper(web_path, singular),
       sample_id: sample_id(opts),
+      context_underscore: context_underscore,
       context_app: ctx_app,
       generate?: generate?,
       yes: cli_attrs[:yes],

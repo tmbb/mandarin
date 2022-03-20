@@ -33,6 +33,7 @@ defmodule Mandarin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:sourceror, "~> 0.10"},
       {:forage, "~> 0.5"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},

@@ -2,7 +2,7 @@ defmodule Mix.Tasks.Mandarin.Install do
   @shortdoc "Generates controller, views, and context for an HTML resource"
 
   @moduledoc """
-  Installs the files into your application
+  Removes a mandarin context from your application
   """
   use Mix.Task
 
@@ -96,6 +96,7 @@ defmodule Mix.Tasks.Mandarin.Install do
 
       # Only inject the code if the file doesn't contain the start of the pipeline
       router_contents = File.read!(router_path)
+
       case String.contains?(router_contents, pipeline_start) do
         false ->
           Injector.inject_before_final_end(pipeline_and_scope, router_path)
@@ -146,7 +147,6 @@ defmodule Mix.Tasks.Mandarin.Install do
   #     |> Mix.Mandarin.maybe_format_code(file_path)
   #   end
   # end
-
 
   # Path to the sidebar template
   # This path must be accessible from outside this module

@@ -145,14 +145,20 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     ctx_web_path = Mix.Mandarin.web_path(ctx_app)
     router_path = "#{ctx_web_path}/router.ex"
     routes_marker = "# %% Mandarin Routes - #{inspect(context.alias)} %%"
+    skip_marker = "# Routes for #{inspect(context.alias)}.#{inspect(schema.alias)}\n"
 
     routes_code = """
-    # Routes for #{inspect(context.alias)}.#{inspect(schema.alias)}
+    #{skip_marker}\
     get "/#{schema.singular}/select", #{inspect(schema.alias)}Controller, :select
     resources "/#{schema.singular}", #{inspect(schema.alias)}Controller\
     """
 
-    Injector.inject_below_in_file(router_path, routes_marker, routes_code)
+    Injector.inject_below_in_file(
+      router_path,
+      routes_marker,
+      routes_code,
+      skip_marker: skip_marker
+    )
   end
 
   @links_end "\n  <%# %% Resource Links - END %% %>"
@@ -304,8 +310,8 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
   def print_shell_instructions(
         _context,
-        :already_injected
-      ) do
+        result
+      ) when result in [:already_injected, :skip] do
     # No need to add new routes because they were already there
     Mix.shell().info("""
 
@@ -355,70 +361,70 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         {key, :integer} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_text_input/3) %>\
           """
 
         {key, :float} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_text_input/3) %>\
           """
 
         {key, :decimal} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_text_input/3) %>\
           """
 
         {key, :boolean} ->
           """
-            <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+            <%= forage_form_check(f, #{inspect(key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_checkbox/3) %>\
           """
 
         {key, :text} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_textarea/3) %>\
           """
 
         {key, :date} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_date_input/3) %>\
           """
 
         {key, :time} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_time_select/3) %>\
           """
 
         {key, :utc_datetime} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_datetime_select/3) %>\
           """
 
         {key, :naive_datetime} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_datetime_select/3) %>\
           """
 
         {key, {:array, :integer}} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   fn form, field, _opts ->
                     multiple_select(form, field, ["1": 1, "2": 2], class: "form-control")
                   end) %>\
@@ -427,7 +433,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         {key, {:array, _}} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   fn form, field, _opts ->
                     multiple_select(&1, &2, ["Option 1": "option1", "Option 2": "option2"], class: "form-control")
                   end) %>\
@@ -436,7 +442,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         {key, _} ->
           """
             <%= forage_form_group(f, #{inspect(key)},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   &forage_text_input/3) %>\
           """
       end)
@@ -448,7 +454,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
           """
             <%= forage_form_group(f, :#{atom_singular_id},
-                  #{i18n_label_for(context, key)},
+                  #{i18n_label_for(context, key)}, [],
                   fn form, field, opts ->
                     forage_select(form, field, #{path}, opts)
                   end) %>\

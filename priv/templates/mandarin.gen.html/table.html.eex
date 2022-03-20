@@ -16,15 +16,8 @@
 <%%= for <%= schema.singular %> <- @<%= schema.pluralized %>.entries do %>
     <tr>
 <%= for {key, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}] do %>      <td><%%= <%= schema.singular %>.<%= key %> %></td>
-<% end %><%= for {key, atom_singular_id, _full_module_name, _atom_plural} <- schema.assocs do %><%
-  path = "Routes.#{context.basename}_#{atom_singular_id}_path"
-%>      <td>
-        <%%= if <%= schema.singular %>.<%= key %> do %>
-          <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>) %>">
-            <%%= forage_as_html(<%= schema.singular %>.<%= key %>) %>
-          </a>
-        <%% end %>
-      </td>
+<% end %><%= for {key, _atom_singular_id, _full_module_name, _atom_plural} <- schema.assocs do %>
+      <td><%%= forage_as_html_with_link(@conn, <%= schema.singular %>.<%= key %>) %></td>
 <% end %>
       <td>
         <%%# Links %>

@@ -11,7 +11,7 @@ defmodule Mandarin.Injector do
   def inject_before_final_end(content_to_inject, file_path) do
     file = File.read!(file_path)
 
-    if String.contains?(file, String.trim(content_to_inject)) do
+    if String.contains?(file, content_to_inject) do
       :ok
     else
       Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
@@ -29,16 +29,32 @@ defmodule Mandarin.Injector do
     end
   end
 
+  defp with_skip_marker(path, opts, fun) do
+    case Keyword.fetch(opts, :skip_marker) do
+      {:ok, marker} ->
+        content = File.read!(path)
+        if String.contains?(content, marker) do
+          :skip
+        else
+          fun.(content)
+        end
+
+      :error ->
+        path |> File.read!() |> fun.()
+    end
+  end
+
   @doc """
   Reads the contents of a file and injects the text below the given marker.
   Logs a warning if the marker wasn't found in the file.
   """
-  @spec inject_below_in_file(Path.t(), String.t(), String.t()) :: file_injection_result()
-  def inject_below_in_file(file, marker, injected) do
-    file
-    |> File.read!()
-    |> inject_below_in_text(marker, injected)
-    |> update_file_if_marker_was_found(file, marker)
+  @spec inject_below_in_file(Path.t(), String.t(), String.t(), Keyword.t()) :: file_injection_result()
+  def inject_below_in_file(file, marker, injected, opts \\ []) do
+    with_skip_marker(file, opts, fn content ->
+      content
+      |> inject_below_in_text(marker, injected)
+      |> update_file_if_marker_was_found(file, marker)
+    end)
   end
 
   @doc """

@@ -17,7 +17,10 @@
       maybe_default_sort_field = Mix.Mandarin.Schema.maybe_default_sort_field(schema)
       sort_fields = maybe_default_sort_field ++ [:id]
     %>
-    Forage.paginate(params, <%= inspect schema.alias %>, Repo, sort: <%= inspect(sort_fields) %>, preload: <%= inspect(preload) %>)
+    Forage.paginate(params, <%= inspect schema.alias %>, Repo,
+      sort: <%= inspect(sort_fields) %>,
+      preload: <%= inspect(preload) %>
+    )
   end
 
   @doc """
@@ -31,10 +34,13 @@
   """<% search_field = Mix.Mandarin.Schema.default_search_field(schema) %><%= if search_field do %>
   def search_<%= schema.pluralized %>(params) do
     search_params = Forage.naive_search_params(params, :<%= search_field %>)
-    Forage.paginate(search_params, <%= inspect schema.alias %>, Repo, sort: <%= inspect(sort_fields) %>)
+    Forage.paginate(search_params, <%= inspect schema.alias %>, Repo,
+      sort: <%= inspect(sort_fields) %>,
+      preload: <%= inspect(preload) %>
+    )
   end<% else %>
   def search_<%= schema.pluralized %>(_params) do
-    raise UndefinedFunctionError, "<%= inspect(schema.alias) %> doesn't have a string field that can be used for for search"
+    raise UndefinedFunctionError, "<%= inspect(schema.alias) %> doesn't have a string field that can be used for search"
   end<% end %>
 
   @doc """
@@ -51,7 +57,10 @@
       ** (Ecto.NoResultsError)
 
   """
-  def get_<%= schema.singular %>!(id), do: Repo.get!(<%= inspect schema.alias %>, id) |> Repo.preload(<%= inspect(preload) %>)
+  def get_<%= schema.singular %>!(id) do
+    Repo.get!(<%= inspect schema.alias %>, id)
+    |> Repo.preload(<%= inspect(preload) %>)
+  end
 
   @doc """
   Creates a <%= schema.singular %>.

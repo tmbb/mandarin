@@ -117,7 +117,11 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     {opts, parsed, _} = parse_opts(args)
     [context_name, schema_name, plural | schema_args] = validate_args!(parsed)
     schema_module = inspect(Module.concat(context_name, schema_name))
-    schema = Gen.Schema.build([schema_module, plural | schema_args], opts, __MODULE__)
+    # start WARNING - Hacky
+    context_underscore = Macro.underscore(context_name)
+    all_opts = Keyword.put(opts, :context_underscore, context_underscore)
+    # end WARNING
+    schema = Gen.Schema.build([schema_module, plural | schema_args], all_opts, __MODULE__)
     context = Context.new(context_name, schema, opts)
     {context, schema}
   end
@@ -206,7 +210,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
 
     file = File.read!(file_path)
 
-    if String.contains?(file, String.trim(string_to_test_for)) do
+    if String.contains?(file, string_to_test_for) do
       :ok
     else
       Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
