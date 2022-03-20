@@ -2,7 +2,8 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
   @shortdoc "Uninstall a Mandarin context"
 
   @moduledoc """
-  Installs the files into your application
+  Uninstalls the context from your application.
+  This task removes the files and directories created by the `mix mandarin.install` task.
   """
   use Mix.Task
 
@@ -41,7 +42,7 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
     # What we actually do:
     #
     # - Remove the routes from the router
-    #   (this will raise and exception if the 'router.ex' file contains invalid Elixir code)
+    #   (this will raise an exception if the 'router.ex' file contains invalid Elixir code)
     uninstall_from_router(install)
     # - Delete the files and directories
     delete_files_and_directories(install)

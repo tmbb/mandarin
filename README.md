@@ -31,19 +31,19 @@ Instead of splitting the web-related files into different directories (one for c
 Essentially, instead of this:
 
 ```
-🗀 hello_web
-  🗀 controllers
+🗀 hello_web/
+  🗀 controllers/
       foo_controller.ex
       bar_controller.ex
       ...
-  🗀 templates
+  🗀 templates/
     🗀 foo
         index.html.eex
         ...
-    🗀 bar
+    🗀 bar/
         index.html.eex
         ...
-  🗀 views
+  🗀 views/
       foo_view.eex
       bar_view.eex
       ...
@@ -53,16 +53,16 @@ You have this:
 
 ```
 🗀 hello_web
-    🗀 foo
+    🗀 foo/
         foo_controller.ex
         foo_view.ex
-        🗀 templates
+        🗀 templates/
             index.html.eex
             ...
-    🗀 bar
+    🗀 bar/
         bar_controller.ex
         bar_view.ex
-        🗀 templates
+        🗀 templates/
             index.html.eex
             ...
 ```

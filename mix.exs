@@ -34,9 +34,7 @@ defmodule Mandarin.MixProject do
   defp deps do
     [
       {:sourceror, "~> 0.10"},
-      {:forage, "~> 0.5"},
-      {:ecto, "~> 3.0"},
-      {:ecto_sql, "~> 3.0"},
+      {:forage, "~> 0.6"},
       {:inflex, "~> 2.0.0"},
       {:ex_doc, "~> 0.23", only: :dev}
     ]
