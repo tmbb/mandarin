@@ -200,7 +200,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   EEx.function_from_file(
     :defp,
     :sidebar_link,
-    "priv/templates/mandarin.gen.html/sidebar-link.html.eex",
+    "priv/templates/mandarin.gen.html/sidebar-link.html.heex",
     [:context, :schema]
   )
 
@@ -233,7 +233,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   def files_to_be_generated(%Context{schema: schema, context_app: context_app} = context) do
     web_prefix = Mix.Mandarin.web_path(context_app)
     test_prefix = Mix.Mandarin.web_test_path(context_app)
-    web_path = to_string(schema.web_path)
+    # web_path = to_string(schema.web_path)
     ctx_basename = context.basename
 
     feature_dir = Path.join([web_prefix, ctx_basename, schema.singular])
@@ -245,15 +245,14 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     controller_test_path =
       Path.join([
         test_prefix,
-        "controllers",
-        web_path,
         ctx_basename,
+        "controllers",
         "#{schema.singular}_controller_test.exs"
       ])
 
     html_templates =
       for name <- ~w(edit filters form index new show table) do
-        filename = "#{name}.html.eex"
+        filename = "#{name}.html.heex"
         output_path = Path.join(template_dir, filename)
         {:eex, filename, output_path}
       end
@@ -311,7 +310,8 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   def print_shell_instructions(
         _context,
         result
-      ) when result in [:already_injected, :skip] do
+      )
+      when result in [:already_injected, :skip] do
     # No need to add new routes because they were already there
     Mix.shell().info("""
 
@@ -464,7 +464,6 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     attrs ++ assocs
   end
 
-
   defp filters(%Context{schema: schema} = context) do
     simple_filters =
       Enum.map(schema.attrs, fn {key, field_type} ->
@@ -492,7 +491,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
             """
               <%= forage_horizontal_form_group(f, #{inspect(key)},
                   #{i18n_label_for(context, key)}, [],
-                  &forage_text_filter/3) %>\
+                  &forage_numeric_filter/3) %>\
             """
 
           :date ->

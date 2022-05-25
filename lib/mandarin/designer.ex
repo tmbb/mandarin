@@ -112,7 +112,7 @@ defmodule Mandarin.Designer do
   The migration files will contain the `tag` in the file name, so you may want
   to make it descriptive.
   """
-  def with_ecto_design_markers(migrations_path \\ @migrations_path, tag, fun) do
+  def with_ecto_design_markers(tag, migrations_path \\ @migrations_path, fun) do
     begin_file_name =
       Path.join(migrations_path, "#{Timestamp.timestamp()}__begin_ecto_designer__#{tag}__.txt")
 
@@ -140,8 +140,8 @@ defmodule Mandarin.Designer do
   In fact, the user is not meant to interact with them directly.
   Ecto will be capable of using them when required if the schemas are configured correctly.
   """
-  @spec generate_mandarin_schema(String.t(), Params.t()) :: :ok
-  def generate_mandarin_schema(migrations_path \\ @migrations_path, params) do
+  @spec generate_mandarin_schema(Params.t(), String.t()) :: :ok
+  def generate_mandarin_schema(params, migrations_path \\ @migrations_path) do
     args = params_to_arguments(params)
     # The schema name is of the form `Context.Schema`
     schema_name = Module.concat(params.context, params.alias) |> inspect()
@@ -156,8 +156,8 @@ defmodule Mandarin.Designer do
   @doc """
   Generate a mandarin context (without generating a web interface)
   """
-  @spec generate_mandarin_context(String.t(), Params.t()) :: :ok
-  def generate_mandarin_context(migrations_path \\ @migrations_path, params) do
+  @spec generate_mandarin_context(Params.t(), String.t()) :: :ok
+  def generate_mandarin_context(params, migrations_path \\ @migrations_path) do
     args = params_to_arguments(params)
     context = inspect(params.context)
     name = inspect(params.alias)
@@ -175,16 +175,16 @@ defmodule Mandarin.Designer do
   If the params belong to a `join_through` table, this is the same
   as running `generate_mandarin_schema(params)`.
   """
-  @spec generate_mandarin_html(String.t(), Params.t()) :: :ok
-  def generate_mandarin_html(migrations_path \\ @migrations_path, params) do
+  @spec generate_mandarin_html(Params.t(), String.t()) :: :ok
+  def generate_mandarin_html(params, migrations_path \\ @migrations_path) do
     if params.is_join_through? do
-      generate_mandarin_schema(migrations_path, params)
+      generate_mandarin_schema(params, migrations_path)
     else
-      do_generate_mandarin_html(migrations_path, params)
+      do_generate_mandarin_html(params, migrations_path)
     end
   end
 
-  defp do_generate_mandarin_html(migrations_path, params) do
+  defp do_generate_mandarin_html(params, migrations_path) do
     args = params_to_arguments(params)
     context = inspect(params.context)
     name = inspect(params.alias)
@@ -202,11 +202,11 @@ defmodule Mandarin.Designer do
   If the any params belong to a `join_through` table, this will run
   `generate_mandarin_schema(params)` for those params.
   """
-  def generate_mandarin_html_for_all(migrations_path \\ @migrations_path, tag, list_of_params)
+  def generate_mandarin_html_for_all(list_of_params, tag, migrations_path \\ @migrations_path)
       when tag != "" do
     with_ecto_design_markers(tag, fn ->
       for params <- list_of_params do
-        generate_mandarin_html(migrations_path, params)
+        generate_mandarin_html(params, migrations_path)
       end
     end)
   end
@@ -245,7 +245,7 @@ defmodule Mandarin.Designer do
 
   defp params_to_arguments(params) do
     # Convert params attributes into arguments that can be given
-    # to the phoenix (or vphx/vertical_phoenix) generators
+    # to the phoenix (or mandarin/vertical_phoenix) generators
     maybe_binary_id =
       case params.binary_id do
         true -> ["--binary-id"]
@@ -258,7 +258,7 @@ defmodule Mandarin.Designer do
         false -> ["--no-migration"]
       end
 
-    fields = make_fields(params.fields)
+    fields = make_fields(params.fields) |> IO.inspect()
     [params.table] ++ fields ++ maybe_binary_id ++ maybe_migration
   end
 end

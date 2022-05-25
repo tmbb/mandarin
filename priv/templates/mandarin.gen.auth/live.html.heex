@@ -1,0 +1,19 @@
+<main class="container col-md-6 offset-md-3">
+  <%%
+    info = live_flash(@conn, :info)
+    error = live_flash(@conn, :error)
+  %>
+  <%%= if info do %>
+    <p class="alert alert-info" role="alert"
+      phx-click="lv:clear-flash"
+      phx-value-key="info"><%%= info %></p>
+  <%% end %>
+
+  <%%= if error do %>
+    <p class="alert alert-danger" role="alert"
+      phx-click="lv:clear-flash"
+      phx-value-key="error"><%%= error %></p>
+  <%% end %>
+
+  <%%= @inner_content %>
+</main>

@@ -1,16 +1,18 @@
 defmodule <%= install.mandarin_web_module %> do
   @moduledoc """
-  The entrypoint for defining your web interface, such
-  as controllers, views, channels and so on.
+  The entrypoint for defining the web interface to your Mandarin contexts,
+  such as controllers, views, channels and so on.
+
+  This module is analogous to the `YourAppWeb` module defined
+  by the Phoenix generators.
+
+  Mandarin, unlike Phoenix, implements a "vertical" folder structure
+  which keeps controllers, views and templates together in the same file.
 
   This can be used in your application as:
 
       use <%= install.mandarin_web_module %>, :controller
       use <%= install.mandarin_web_module %>, :view
-
-  The definitions below will be executed for every view,
-  controller, etc, so keep them short and clean, focused
-  on imports, uses and aliases.
 
   Do NOT define functions inside the quoted expressions
   below. Instead, define any helper function in modules
@@ -110,7 +112,8 @@ defmodule <%= install.mandarin_web_module %> do
     apply(__MODULE__, which, [params])
   end
 
-  # Helpers
+  # Helpers (kept here to keep the file self-contained
+  # without runtime dependencies on Mandarin)
   defp namespace_from_module(module) do
     module
     |> Module.split()

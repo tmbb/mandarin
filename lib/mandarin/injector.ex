@@ -33,6 +33,7 @@ defmodule Mandarin.Injector do
     case Keyword.fetch(opts, :skip_marker) do
       {:ok, marker} ->
         content = File.read!(path)
+
         if String.contains?(content, marker) do
           :skip
         else
@@ -48,7 +49,8 @@ defmodule Mandarin.Injector do
   Reads the contents of a file and injects the text below the given marker.
   Logs a warning if the marker wasn't found in the file.
   """
-  @spec inject_below_in_file(Path.t(), String.t(), String.t(), Keyword.t()) :: file_injection_result()
+  @spec inject_below_in_file(Path.t(), String.t(), String.t(), Keyword.t()) ::
+          file_injection_result()
   def inject_below_in_file(file, marker, injected, opts \\ []) do
     with_skip_marker(file, opts, fn content ->
       content

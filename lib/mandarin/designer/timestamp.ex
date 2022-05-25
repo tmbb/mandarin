@@ -5,7 +5,8 @@ defmodule Mandarin.Designer.Timestamp do
   # for ecto migrations. The ecto generators (which Phoenix and Mandarin use)
   # generate timestamps with a granularity of a second.
   # This is enough if the user is manually running the generators one by one,
-  # but it«s not enough if we're using the generators programmatcally.
+  # but it's not enough if we're using the generators programmatcally.
+  #
   # If we're running the generators programmatically we can generate
   # a new migration table in microseconds or milliseconds, and thus the
   # timestamps will be the same. This will breake the ecto migration system.

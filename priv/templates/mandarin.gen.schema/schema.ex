@@ -14,7 +14,7 @@ defmodule <%= inspect schema.module %> do<%
   @derive Phoenix.Param
 
   schema <%= inspect schema.table %> do
-<%= for {k, v} <- schema.types do %>    field <%= inspect k %>, <%= inspect v %><%= schema.defaults[k] %>
+<%= for {k, v} <- schema.attrs do %>    field <%= inspect k %>, <%= inspect schema.types[k] %><%= schema.defaults[k] %>
 <% end %><%= for {_, k, string_alias, table_name_atom} <- schema.assocs do %><%
   prefix = string_alias |> String.split(".") |> Enum.drop(-1) |> Enum.join(".")
   module_alias = Mandarin.Naming.table_name_to_module_name(table_name_atom)

@@ -5,6 +5,7 @@ defmodule Mix.Tasks.Mandarin.Install do
   Removes a mandarin context from your application
   """
   use Mix.Task
+  alias Mix.Tasks.Mandarin.InstallUninstallHelpers
 
   require EEx
 
@@ -12,36 +13,8 @@ defmodule Mix.Tasks.Mandarin.Install do
   alias Mandarin.Naming
   alias Mandarin.Injector
 
-  @switches [web: :string]
-
   def build(args, app, web_path) do
-    {_optional, args, _} = OptionParser.parse(args, switches: @switches)
-
-    context_camel_case =
-      case args do
-        [arg] -> arg
-        _ -> Mix.raise(~s'mix mandarin.install requires a context name (e.g. "Admin")')
-      end
-
-    context_app = Mix.Mandarin.context_app()
-    context_app_camelcase = context_app |> to_string() |> Macro.camelize()
-    context_underscore = Macro.underscore(context_camel_case)
-    web_module = "#{context_app_camelcase}Web"
-    mandarin_web_module = Naming.mandarin_web_module(context_app)
-    layout_view_underscore = "#{context_underscore}_layout_view"
-    layout_view_camel_case = Macro.camelize(layout_view_underscore)
-
-    %Install{
-      app: app,
-      context_app: context_app,
-      context_camel_case: context_camel_case,
-      mandarin_web_module: mandarin_web_module,
-      web_module: web_module,
-      context_underscore: context_underscore,
-      layout_view_camel_case: layout_view_camel_case,
-      layout_view_underscore: layout_view_underscore,
-      web_path: web_path
-    }
+    InstallUninstallHelpers.build(args, app, web_path)
   end
 
   def write_p!(path, content) do
@@ -130,24 +103,6 @@ defmodule Mix.Tasks.Mandarin.Install do
     end
   end
 
-  # def inject_eex_before_final_end(content_to_inject, file_path) do
-  #   file = File.read!(file_path)
-
-  #   if String.contains?(file, String.trim(content_to_inject)) do
-  #     :ok
-  #   else
-  #     Mix.shell().info([:green, "* injecting ", :reset, Path.relative_to_cwd(file_path)])
-
-  #     file
-  #     |> String.trim_trailing()
-  #     |> String.trim_trailing("end")
-  #     |> Kernel.<>(content_to_inject)
-  #     |> Kernel.<>("end\n")
-  #     |> write_file(file_path)
-  #     |> Mix.Mandarin.maybe_format_code(file_path)
-  #   end
-  # end
-
   # Path to the sidebar template
   # This path must be accessible from outside this module
   # when we want to populate the sidebar links automatically
@@ -157,7 +112,7 @@ defmodule Mix.Tasks.Mandarin.Install do
     group_dir = Path.join([web_prefix, ctx_basename])
     layout_feature_dir = Path.join(group_dir, "_layout")
     layout_templates_dir = Path.join(layout_feature_dir, "templates")
-    layout_sidebar_template_path = Path.join(layout_templates_dir, "sidebar.html.eex")
+    layout_sidebar_template_path = Path.join(layout_templates_dir, "sidebar.html.heex")
 
     layout_sidebar_template_path
   end
@@ -177,12 +132,16 @@ defmodule Mix.Tasks.Mandarin.Install do
     index_feature_dir = Path.join(group_dir, "index")
     index_controller_path = Path.join(index_feature_dir, "index_controller.ex")
     index_view_path = Path.join(index_feature_dir, "index_view.ex")
-    index_template_path = Path.join([index_feature_dir, "templates", "index.html.eex"])
+    index_template_path = Path.join([index_feature_dir, "templates", "index.html.heex"])
 
     layout_feature_dir = Path.join(group_dir, "_layout")
     layout_view_path = Path.join(layout_feature_dir, "layout_view.ex")
     layout_templates_dir = Path.join(layout_feature_dir, "templates")
-    layout_layout_template_path = Path.join(layout_templates_dir, "layout.html.eex")
+
+    root_layout_template_path = Path.join(layout_templates_dir, "root.html.heex")
+    app_layout_template_path = Path.join(layout_templates_dir, "app.html.heex")
+    live_layout_template_path = Path.join(layout_templates_dir, "live.html.heex")
+
     layout_sidebar_template_path = sidebar_path(context_app, install.context_underscore)
 
     # Only generate this file if it doesn't exist already
@@ -195,16 +154,21 @@ defmodule Mix.Tasks.Mandarin.Install do
         true -> []
       end
 
-    [
+    web_templates = [
       # Files related to the default "index" page for a mandarin CRUD interface
       {:eex, "index_controller.ex", index_controller_path},
       {:eex, "index_view.ex", index_view_path},
-      {:eex, "index.html.eex", index_template_path},
+      {:eex, "index.html.heex", index_template_path},
       # Files related to the "layout" page for a mandarin CRUD interface
+      # (we adopt the app/live distinction from the normal phoenix generators)
       {:eex, "layout_view.ex", layout_view_path},
-      {:eex, "layout.html.eex", layout_layout_template_path},
-      {:eex, "sidebar.html.eex", layout_sidebar_template_path}
-    ] ++ maybe_mandarin_web
+      {:eex, "root.html.heex", root_layout_template_path},
+      {:eex, "app.html.heex", app_layout_template_path},
+      {:eex, "live.html.heex", live_layout_template_path},
+      {:eex, "sidebar.html.heex", layout_sidebar_template_path}
+    ]
+
+    maybe_mandarin_web ++ web_templates
   end
 
   router_template = "priv/templates/mandarin.install/router.ex"
@@ -230,7 +194,7 @@ defmodule Mix.Tasks.Mandarin.Install do
       context_underscore: ctx,
       web_module: web_module,
       web_path: web_path,
-      layout_view_camel_case: layout_view_camel_case
+      layout_view_module: layout_view_module
     } = install
 
     files =
@@ -244,10 +208,12 @@ defmodule Mix.Tasks.Mandarin.Install do
       * "#{files["layout_view.ex"]}"
           - the layout view for the mandarin pages
 
-      * "#{files["layout.html.eex"]}"
+      * "#{files["root.html.heex"]}",
+        "#{files["app.html.heex"]}",
+        "#{files["live.html.heex"]}"
           - the layout templates for the mandarin pages
 
-      * "#{files["sidebar.html.eex"]}"
+      * "#{files["sidebar.html.heex"]}"
           - the sidebar links for the admin pages;
             when a new resource is generated, a new link will be appended to this list
 
@@ -257,7 +223,7 @@ defmodule Mix.Tasks.Mandarin.Install do
       * "#{files["index_controller.ex"]}"
           - the controller for the index page
 
-      * "#{files["index.html.eex"]}"
+      * "#{files["index.html.heex"]}"
           - the template for the index page
 
     A new pipeline and a new scope have been injected in the "#{web_path}/router.ex" file.
@@ -268,7 +234,7 @@ defmodule Mix.Tasks.Mandarin.Install do
         require Mandarin.Router
 
         pipeline :#{ctx}_layout do
-          plug(:put_layout, {#{web_module}.#{layout_view_camel_case}, "layout.html"})
+          plug(:put_layout, {#{web_module}.#{layout_view_module}, "layout.html"})
         end
 
         scope "/#{ctx}", #{web_module}.#{context_camel_case}, as: :#{ctx} do

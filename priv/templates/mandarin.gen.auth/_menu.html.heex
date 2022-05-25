@@ -1,0 +1,22 @@
+<ul>
+<%%= if @current_<%= schema.singular %> do %>
+  <li><%%= @current_<%= schema.singular %>.email %></li>
+  <li>
+    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Settings"),
+          to: Routes.<%= schema.route_helper %>_settings_path(@conn, :edit) %>
+  </li>
+  <li>
+    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Log out"),
+          to: Routes.<%= schema.route_helper %>_session_path(@conn, :delete), method: :delete %>
+  </li>
+<%% else %>
+  <li>
+    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Register"),
+          to: Routes.<%= schema.route_helper %>_registration_path(@conn, :new) %>
+  </li>
+  <li>
+    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Log in"),
+          to: Routes.<%= schema.route_helper %>_session_path(@conn, :new) %>
+    </li>
+<%% end %>
+</ul>

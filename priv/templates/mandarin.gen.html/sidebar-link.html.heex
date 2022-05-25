@@ -1,7 +1,7 @@
     <li class="list-group-item">
       <div>
         <h6 class="my-0">
-          <a href="<%%= Routes.<%= context.basename %>_<%= schema.singular %>_path(@conn, :index) %>">
+          <a href={Routes.<%= context.basename %>_<%= schema.singular %>_path(@conn, :index)}>
             <%%= dgettext("mandarin.<%= context.basename %>", "<%= schema.human_singular %>") %>
           </a>
         </h6>

@@ -1,3 +1,0 @@
-<section class="content-header">
-  <h1><%%= dgettext("mandarin.<%= install.context_underscore %>", "Index page") %><h1>
-</section>

@@ -113,7 +113,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
   end
 
   @doc false
-  def build(args) do
+  def build(args, _help \\ __MODULE__) do
     {opts, parsed, _} = parse_opts(args)
     [context_name, schema_name, plural | schema_args] = validate_args!(parsed)
     schema_module = inspect(Module.concat(context_name, schema_name))
@@ -157,8 +157,39 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     if schema.generate?, do: Gen.Schema.copy_new_files(schema, paths, binding)
     inject_schema_access(context, paths, binding)
     inject_tests(context, paths, binding)
+    inject_test_fixture(context, paths, binding)
 
     context
+  end
+
+  @doc false
+  def ensure_context_file_exists(%Context{file: file} = context, paths, binding) do
+    unless Context.pre_existing?(context) do
+      Mix.Generator.create_file(
+        file,
+        Mix.Mandarin.eval_from(paths, "priv/templates/mandarin.gen.context/context.ex", binding)
+      )
+    end
+  end
+
+  @doc false
+  def ensure_test_file_exists(%Context{test_file: test_file} = context, paths, binding) do
+    unless Context.pre_existing_tests?(context) do
+      Mix.Generator.create_file(
+        test_file,
+        Mix.Mandarin.eval_from(paths, "priv/templates/mandarin.gen.context/context_test.exs", binding)
+      )
+    end
+  end
+
+  @doc false
+  def ensure_test_fixtures_file_exists(%Context{test_fixtures_file: test_fixtures_file} = context, paths, binding) do
+    unless Context.pre_existing_test_fixtures?(context) do
+      Mix.Generator.create_file(
+        test_fixtures_file,
+        Mix.Mandarin.eval_from(paths, "priv/templates/mandarin.gen.context/fixtures_module.ex", binding)
+      )
+    end
   end
 
   defp inject_schema_access(%Context{file: file, schema: schema} = context, paths, binding) do
@@ -198,6 +229,46 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     paths
     |> Mix.Mandarin.eval_from("priv/templates/mandarin.gen.context/test_cases.exs", binding)
     |> inject_eex_before_final_end(test_file, binding)
+  end
+
+
+  defp inject_test_fixture(%Context{test_fixtures_file: test_fixtures_file} = context, paths, binding) do
+    ensure_test_fixtures_file_exists(context, paths, binding)
+
+    paths
+    |> Mix.Mandarin.eval_from("priv/templates/mandarin.gen.context/fixtures.ex", binding)
+    |> Mix.Mandarin.prepend_newline()
+    |> inject_eex_before_final_end(test_fixtures_file, binding)
+
+    maybe_print_unimplemented_fixture_functions(context)
+  end
+
+  defp maybe_print_unimplemented_fixture_functions(%Context{} = context) do
+    fixture_functions_needing_implementations =
+      Enum.flat_map(
+        context.schema.fixture_unique_functions,
+        fn
+          {_field, {_function_name, function_def, true}} -> [function_def]
+          {_field, {_function_name, _function_def, false}} -> []
+        end
+      )
+
+    if Enum.any?(fixture_functions_needing_implementations) do
+      Mix.shell.info(
+        """
+
+        Some of the generated database columns are unique. Please provide
+        unique implementations for the following fixture function(s) in
+        #{context.test_fixtures_file}:
+
+        #{
+          fixture_functions_needing_implementations
+          |> Enum.map_join(&indent(&1, 2))
+          |> String.trim_trailing()
+        }
+        """
+      )
+    end
   end
 
   defp inject_eex_before_final_end(
@@ -240,6 +311,20 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
     else
       "access_no_schema.ex"
     end
+  end
+
+  defp indent(string, spaces) do
+    indent_string = String.duplicate(" ", spaces)
+
+    string
+    |> String.split("\n")
+    |> Enum.map_join(fn line ->
+        if String.trim(line) == "" do
+          "\n"
+        else
+          indent_string <> line <> "\n"
+        end
+    end)
   end
 
   defp validate_args!([context, schema, _plural | _] = args) do

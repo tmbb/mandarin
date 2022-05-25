@@ -6,6 +6,7 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
   This task removes the files and directories created by the `mix mandarin.install` task.
   """
   use Mix.Task
+  alias Mix.Tasks.Mandarin.InstallUninstallHelpers
 
   require EEx
 
@@ -13,9 +14,6 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
   # Uninstalling is the inverse of installing, so it actually makes sense
   # to use the same structure for both inverse tasks
   alias Mix.Mandarin.Install
-  alias Mandarin.Naming
-
-  @switches [web: :string]
 
   @doc false
   def run(args) do
@@ -54,33 +52,7 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
   end
 
   def build(args, app, web_path) do
-    {_optional, args, _} = OptionParser.parse(args, switches: @switches)
-
-    context_camel_case =
-      case args do
-        [arg] -> arg
-        _ -> Mix.raise(~s'mix mandarin.install requires a context name (e.g. "Admin")')
-      end
-
-    context_app = Mix.Mandarin.context_app()
-    context_app_camelcase = context_app |> to_string() |> Macro.camelize()
-    context_underscore = Macro.underscore(context_camel_case)
-    web_module = "#{context_app_camelcase}Web"
-    mandarin_web_module = Naming.mandarin_web_module(context_app)
-    layout_view_underscore = "#{context_underscore}_layout_view"
-    layout_view_camel_case = Macro.camelize(layout_view_underscore)
-
-    %Install{
-      app: app,
-      context_app: context_app,
-      context_camel_case: inspect(context_camel_case),
-      mandarin_web_module: mandarin_web_module,
-      web_module: web_module,
-      context_underscore: context_underscore,
-      layout_view_camel_case: layout_view_camel_case,
-      layout_view_underscore: layout_view_underscore,
-      web_path: web_path
-    }
+    InstallUninstallHelpers.build(args, app, web_path)
   end
 
   def write_p!(path, content) do
@@ -92,12 +64,16 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
   defp remove_migrations_for_this_context(%Install{} = install) do
     context = install.context_underscore
     migration_suffix = "__mandarin_#{context}.exs"
+    markers_suffix = "__#{context}__.txt"
     migrations_directory = "priv/repo/migrations"
 
     for rel_path <- File.ls!(migrations_directory) do
       abs_path = Path.join(migrations_directory, rel_path)
 
-      if String.ends_with?(abs_path, migration_suffix) do
+      is_migration_file? = String.ends_with?(abs_path, migration_suffix)
+      is_marker_file? = String.ends_with?(abs_path, markers_suffix)
+
+      if is_migration_file? or is_marker_file? do
         File.rm!(abs_path)
       end
     end

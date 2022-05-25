@@ -1,0 +1,19 @@
+<main class="col-sm-10">
+  <%%
+    info = get_flash(@conn, :info)
+    error = get_flash(@conn, :error)
+  %>
+  <%%= if info do %>
+    <div class="alert alert-info" role="alert"><%%= info %></div>
+      <%% end %>
+  <%%= if error do %>
+    <div class="alert alert-danger" role="alert"><%%= error %></div>
+  <%% end %>
+
+  <%## The main content of the view %>
+  <div class="card">
+    <div class="card-body">
+      <%%= @inner_content %>
+    </div>
+  </div>
+</main>

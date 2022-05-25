@@ -1,8 +1,8 @@
 
   pipeline :<%= install.context_underscore %>_layout do
-    # We won't be using liveviews in our mandarin backend by default:
-    plug(:put_root_layout, false)
-    plug(:put_layout, {<%= install.web_module %>.<%= install.context_camel_case %>LayoutView, "layout.html"})
+    # Use our own layout for pages in this context
+    plug(:put_root_layout, {<%= install.web_module %>.<%= install.layout_view_module %>, :root})
+    plug(:put_layout, {<%= install.web_module %>.<%= install.layout_view_module %>, :app})
   end
 
   scope "/<%= install.context_underscore %>", <%= install.web_module %>.<%= install.context_camel_case %>, as: :<%= install.context_underscore %> do

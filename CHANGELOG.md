@@ -22,7 +22,7 @@ Instead of having
     ...
     user/
       ...
-      index.html.eex
+      index.html.heex
       ...
   ```
 
@@ -35,7 +35,7 @@ Instead of having
       user_view.ex
       templates/
         ...
-        index.html.eex
+        index.html.heex
         ...
 
   ```
@@ -61,7 +61,7 @@ templates/
   ...
   user/
     ...
-    index.html.eex
+    index.html.heex
     ...
 ```
 
@@ -74,7 +74,7 @@ my_context/
     user_view.ex
     templates/
       ...
-      index.html.eex
+      index.html.heex
       ...
 ```
 

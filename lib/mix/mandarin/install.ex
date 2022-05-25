@@ -8,7 +8,7 @@ defmodule Mix.Mandarin.Install do
     :web_module,
     :mandarin_web_module,
     :layout_view_underscore,
-    :layout_view_camel_case,
+    :layout_view_module,
     :web_path
   ]
 

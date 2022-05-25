@@ -1,6 +1,6 @@
 <h1>
   <%%= dgettext("mandarin.<%= context.basename %>", "Edit <%= schema.human_singular %>") %>
-  <small>(<%%= dgettext("mandarin.<%= context.basename %>", "<%= schema.human_singular %> ID:") %> <%%= @<%= schema.singular %>.id %>)</small>
+  <small>(<%%= dgettext("mandarin.<%= context.basename %>", "ID:") %> <%%= @<%= schema.singular %>.id %>)</small>
 </h1>
 
 <%%= render "form.html", Map.put(assigns, :action, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :update, @<%= schema.singular %>)) %>
