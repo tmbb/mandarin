@@ -2,6 +2,11 @@
 
 <!-- %% CHANGELOG_ENTRIES %% -->
 
+### 0.6.0 - 2022-05-25 02:17:18
+
+Updated `forage` dependency version.
+
+
 ### 0.5.0 - 2021-11-24 11:20:17
 
 Mandarin now generates web resources accordinf to "vertical slices".
