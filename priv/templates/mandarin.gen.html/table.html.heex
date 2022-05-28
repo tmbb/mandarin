@@ -1,13 +1,13 @@
 <%%# Icon definitions - to use in all table rows %>
-<%% show_icon = content_tag(:i, "", class: "fas fa-eye", title: dgettext("mandarin.<%= context.basename %>", "Show")) %>
-<%% edit_icon = content_tag(:i, "", class: "fas fa-edit", title: dgettext("mandarin.<%= context.basename %>", "Edit")) %>
-<%% delete_icon = content_tag(:i, "", class: "fas fa-trash", title: dgettext("mandarin.<%= context.basename %>", "Delete")) %>
+<%% show_icon = content_tag(:i, "", class: "fas fa-eye", title: dgettext("<%= context.basename %>", "Show")) %>
+<%% edit_icon = content_tag(:i, "", class: "fas fa-edit", title: dgettext("<%= context.basename %>", "Edit")) %>
+<%% delete_icon = content_tag(:i, "", class: "fas fa-trash", title: dgettext("<%= context.basename %>", "Delete")) %>
 
 <table class="table">
   <thead>
     <tr>
-<%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}]   do %>      <th><%%= <%= context.basename %>_<%= schema.singular %>_sort_link(@conn, :<%= k %>, dgettext("mandarin.<%= context.basename %>", <%= k |> to_string() |> Mandarin.Naming.humanize() |> inspect() %>)) %></th>
-<% end %><%= for {k, _, _, _} <- schema.assocs do %>      <th><%%= dgettext("mandarin.<%= context.basename %>", "<%= k |> to_string() |> Mandarin.Naming.humanize() %>") %></th>
+<%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}]   do %>      <th><%%= <%= context.basename %>_<%= schema.singular %>_sort_link(@conn, :<%= k %>, dgettext("<%= context.basename %>", <%= k |> to_string() |> Mandarin.Naming.humanize() |> inspect() %>)) %></th>
+<% end %><%= for {k, _, _, _} <- schema.assocs do %>      <th><%%= dgettext("<%= context.basename %>", "<%= k |> to_string() |> Mandarin.Naming.humanize() %>") %></th>
 <% end %>
       <th></th>
     </tr>
@@ -25,7 +25,7 @@
           <%%= link show_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :show, <%= schema.singular %>) %>&nbsp;
           <%%= link edit_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, <%= schema.singular %>) %>&nbsp;
           <%%= link delete_icon, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :delete, <%= schema.singular %>),
-                  method: :delete, data: [confirm: dgettext("mandarin.<%= context.basename %>", "Are you sure?")], class: "text-danger" %>
+                  method: :delete, data: [confirm: dgettext("<%= context.basename %>", "Are you sure?")], class: "text-danger" %>
         </div>
       </td>
     </tr>

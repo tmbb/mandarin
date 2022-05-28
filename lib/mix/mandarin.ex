@@ -407,6 +407,10 @@ defmodule Mix.Mandarin do
     end
   end
 
+  def to_text(data) do
+    inspect data, limit: :infinity, printable_limit: :infinity
+  end
+
   def prepend_newline(string) do
     "\n" <> string
   end

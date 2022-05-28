@@ -3,6 +3,7 @@ defmodule Mix.Mandarin.Install do
   defstruct [
     :app,
     :context_underscore,
+    :user_entity_name,
     :context_camel_case,
     :context_app,
     :web_module,

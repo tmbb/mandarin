@@ -108,7 +108,6 @@ defmodule Mix.Tasks.Mandarin.Gen.Auth do
 
     context_args = OptionParser.to_argv(opts, switches: @switches) ++ parsed
 
-    # {context, schema} = Gen.Context.build(context_args, __MODULE__)
     {context, schema} = Gen.Context.build(context_args, __MODULE__)
     Gen.Context.prompt_for_code_injection(context)
 
@@ -376,11 +375,13 @@ defmodule Mix.Tasks.Mandarin.Gen.Auth do
       controller_test_template.("settings_controller"),
     ]
 
-    _all_templates =
+    all_templates =
       maybe_mandarin_web ++
       app_related_templates ++
       web_templates ++
       test_related_templates
+
+    IO.inspect(all_templates, label: "mandarin_web_path")
   end
 
 

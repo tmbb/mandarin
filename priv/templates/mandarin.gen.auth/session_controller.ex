@@ -15,22 +15,14 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       <%= inspect schema.alias %>Auth.log_in_<%= schema.singular %>(conn, <%= schema.singular %>, <%= schema.singular %>_params)
     else
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
-      error_message =
-        dgettext(
-          "mandarin.<%= schema.context_underscore %>",
-          "Invalid email or password"
-        )
+      error_message = dgettext("<%= schema.context_underscore %>", "Invalid email or password")
 
       render(conn, "new.html", error_message: error_message)
     end
   end
 
   def delete(conn, _params) do
-    info_message =
-      dgettext(
-        "mandarin.<%= schema.context_underscore %>",
-        "Logged out successfully."
-      )
+    info_message = dgettext("<%= schema.context_underscore %>", "Logged out successfully.")
 
     conn
     |> put_flash(:info, info_message)

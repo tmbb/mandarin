@@ -1,23 +1,23 @@
 <h1 class="pb-3">
-  <%%= dgettext("mandarin.<%= context.basename %>", "Show <%= schema.human_singular %>") %>
-  <small>(<%%= dgettext("mandarin.<%= context.basename %>", "ID:") %> <%%= @<%= schema.singular %>.id %>)</small>
+  <%%= dgettext("<%= context.basename %>", "Show <%= schema.human_singular %>") %>
+  <small>(<%%= dgettext("<%= context.basename %>", "ID:") %> <%%= @<%= schema.singular %>.id %>)</small>
 </h1>
 
 <table class="table">
   <tbody><%=
     for {k, _} <- schema.attrs do %>
     <tr>
-      <td><strong><%%= dgettext("mandarin.<%= context.basename %>", "<%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:") %></strong></td>
+      <td><strong><%%= dgettext("<%= context.basename %>", "<%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:") %></strong></td>
       <td><%%= @<%= schema.singular %>.<%= k %> %></td>
     </tr>
 <% end %><%= for {k, _, _, _} <- schema.assocs do %>
     <tr>
-      <td><strong><%%= dgettext("mandarin.<%= context.basename %>", "<%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:") %></strong></td>
+      <td><strong><%%= dgettext("<%= context.basename %>", "<%= Mandarin.Naming.humanize(Atom.to_string(k)) %>:") %></strong></td>
       <td><%%= forage_as_html_with_link(@conn, @<%= schema.singular %>.<%= k %>) %></td>
     </tr>
 <% end %>  </tbody>
 </table>
 
-<%% edit_link_content = [content_tag(:i, "", class: "fas fa-edit"), dgettext("mandarin.<%= context.basename %>", " Edit")] %>
+<%% edit_link_content = [content_tag(:i, "", class: "fas fa-edit"), dgettext("<%= context.basename %>", " Edit")] %>
 
 <span><%%= link edit_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :edit, @<%= schema.singular %>), class: "btn btn-block btn-primary" %></span>

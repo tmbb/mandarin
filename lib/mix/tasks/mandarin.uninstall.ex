@@ -55,12 +55,6 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
     InstallUninstallHelpers.build(args, app, web_path)
   end
 
-  def write_p!(path, content) do
-    dir = Path.dirname(path)
-    File.mkdir_p!(dir)
-    File.write!(path, content)
-  end
-
   defp remove_migrations_for_this_context(%Install{} = install) do
     context = install.context_underscore
     migration_suffix = "__mandarin_#{context}.exs"
@@ -162,10 +156,19 @@ defmodule Mix.Tasks.Mandarin.Uninstall do
     # Application directory for the Mandarin context:
     context_dir = Mix.Mandarin.context_lib_path(context_app, ctx_basename)
 
+    web_test_prefix = Mix.Mandarin.web_test_path(context_app)
+    web_test_dir = Path.join(web_test_prefix, ctx_basename)
+
+    test_dir = Mix.Mandarin.context_test_path(context_app, ctx_basename)
+
     # Delete the web files:
     File.rm_rf!(web_context_dir)
     # Delete the context files:
     File.rm_rf!(context_dir)
+    # Delete the application context test files:
+    File.rm_rf!(test_dir)
+    # Delete the web context test files
+    File.rm_rf!(web_test_dir)
 
     :ok
   end

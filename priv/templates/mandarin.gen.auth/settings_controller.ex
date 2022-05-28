@@ -24,11 +24,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
           &Routes.<%= schema.route_helper %>_settings_url(conn, :confirm_email, &1)
         )
 
-        info_message =
-          dgettext(
-            "mandarin.<%= schema.context_underscore %>",
-            "A link to confirm your email change has been sent to the new address."
-          )
+        info_message = dgettext("<%= schema.context_underscore %>", "A link to confirm your email change has been sent to the new address.")
 
         conn
         |> put_flash(:info, info_message)
@@ -47,11 +43,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
 
     case <%= inspect context.alias %>.update_<%= schema.singular %>_password(<%= schema.singular %>, password, <%= schema.singular %>_params) do
       {:ok, <%= schema.singular %>} ->
-        info_message =
-          dgettext(
-            "mandarin.<%= schema.context_underscore %>",
-            "Password updated successfully."
-          )
+        info_message = dgettext("<%= schema.context_underscore %>", "Password updated successfully.")
 
         conn
         |> put_flash(:info, info_message)
@@ -66,22 +58,14 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
   def confirm_email(conn, %{"token" => token}) do
     case <%= inspect context.alias %>.update_<%= schema.singular %>_email(conn.assigns.current_<%= schema.singular %>, token) do
       :ok ->
-        info_message =
-          dgettext(
-            "mandarin.<%= schema.context_underscore %>",
-            "Email changed successfully."
-          )
+        info_message = dgettext("<%= schema.context_underscore %>", "Email changed successfully.")
 
         conn
         |> put_flash(:info, info_message)
         |> redirect(to: Routes.<%= schema.route_helper %>_settings_path(conn, :edit))
 
       :error ->
-        info_message =
-          dgettext(
-            "mandarin.<%= schema.context_underscore %>",
-            "Email change link is invalid or it has expired."
-          )
+        info_message = dgettext("<%= schema.context_underscore %>", "Email change link is invalid or it has expired.")
 
         conn
         |> put_flash(:error, info_message)

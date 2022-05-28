@@ -11,8 +11,8 @@ defmodule <%= inspect context.mandarin_web_module %> do
 
   This can be used in your application as:
 
-      use <%= install.mandarin_web_module %>, :controller
-      use <%= install.mandarin_web_module %>, :view
+      use <%= context.mandarin_web_module %>, :controller
+      use <%= context.mandarin_web_module %>, :view
 
   Do NOT define functions inside the quoted expressions
   below. Instead, define any helper function in modules

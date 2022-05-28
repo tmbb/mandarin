@@ -1,0 +1,34 @@
+<%%# This code works even if you haven't fetched the current user %>
+<%%= if Map.get(assigns, :current_<%= install.user_entity_name %>) do %>
+  <li>
+    <%%= link dgettext("<%= install.user_entity_name %>", "Settings"),
+          to: Routes.<%= install.user_entity_name %>_settings_path(@conn, :edit),
+          class: "nav-link" %>
+  </li>
+  
+  <li class="nav-item">
+    <%%= link dgettext("<%= install.user_entity_name %>", "Log out"),
+          to: Routes.<%= install.user_entity_name %>_session_path(@conn, :delete),
+          method: :delete,
+          class: "nav-link" %>
+  </li>
+  
+  <li class="nav-item">
+    <span class="navbar-text ml-4">
+      <span class="fa fa-user"></span> <%%= @current_<%= install.user_entity_name %>.email %>
+    </span>
+  </li>
+
+<%% else %>
+  <li class="nav-item">
+    <%%= link dgettext("<%= install.user_entity_name %>", "Register"),
+          to: Routes.<%= install.user_entity_name %>_registration_path(@conn, :new),
+          class: "nav-link" %>
+  </li>
+  
+  <li class="nav-item">
+    <%%= link dgettext("<%= install.user_entity_name %>", "Log in"),
+          to: Routes.<%= install.user_entity_name %>_session_path(@conn, :new),
+          class: "nav-link" %>
+    </li>
+<%% end %>

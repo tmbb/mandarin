@@ -19,11 +19,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
             &Routes.<%= schema.route_helper %>_confirmation_url(conn, :edit, &1)
           )
 
-        info_message =
-          dgettext(
-            "mandarin.<%= schema.context_underscore %>",
-            "<%= schema.human_singular %> created successfully."
-          )
+        info_message = dgettext("<%= schema.context_underscore %>", "<%= schema.human_singular %> created successfully.")
 
         conn
         |> put_flash(:info, info_message)

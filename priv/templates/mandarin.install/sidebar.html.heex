@@ -1,9 +1,11 @@
-<%%# Title for the sidebar %>
-<h4 class="d-flex justify-content-between align-items-center mb-3">
-  <span class="text-muted">
-    <%%= dgettext("mandarin.<%= install.context_underscore %>", "Resources") %>
-  </span>
-</h4>
+<%%# Separate slot for the index %>
+<ul class="list-group mb-3">
+  <li class="list-group-item">
+    <h6 class="my-0">
+      <a href={Routes.<%= install.context_underscore %>_index_path(@conn, :index)}><%%= dgettext("<%= install.context_underscore %>", "Index") %></a>
+    </h6>
+  </li>
+</ul>
 
 <ul class="list-group mb-3">
   <%%#

@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Mandarin.InstallUninstallHelpers do
   @moduledoc false
 
-  @switches [web: :string]
+  @switches [web: :string, user: :string]
 
   alias Mix.Mandarin.Install
   alias Mandarin.Naming
@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Mandarin.InstallUninstallHelpers do
   end
 
   def build(args, app, web_path) do
-    {_optional, args, _} = OptionParser.parse(args, switches: @switches)
+    {optional, args, _} = OptionParser.parse(args, switches: @switches)
 
     context_camel_case =
       case args do
@@ -33,6 +33,9 @@ defmodule Mix.Tasks.Mandarin.InstallUninstallHelpers do
     context_app = Mix.Mandarin.context_app()
     context_app_camelcase = context_app |> to_string() |> Macro.camelize()
     context_underscore = Macro.underscore(context_camel_case)
+
+    user_entity_name = Keyword.get(optional, :user)
+
     web_module = "#{context_app_camelcase}Web"
     mandarin_web_module = Naming.mandarin_web_module(context_app)
     layout_view_module = context_camel_case <> ".LayoutView"
@@ -40,6 +43,7 @@ defmodule Mix.Tasks.Mandarin.InstallUninstallHelpers do
     %Install{
       app: app,
       context_app: context_app,
+      user_entity_name: user_entity_name,
       context_camel_case: context_camel_case,
       mandarin_web_module: mandarin_web_module,
       web_module: web_module,

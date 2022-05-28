@@ -1,9 +1,9 @@
 <h1>
-  <%%= dgettext("mandarin.<%= context.basename %>", "<%= schema.human_pluralized %>") %>
-  <small><%%= dgettext("mandarin.<%= context.basename %>", "Browse") %></small>
+  <%%= dgettext("<%= context.basename %>", "<%= schema.human_pluralized %>") %>
+  <small><%%= dgettext("<%= context.basename %>", "Browse") %></small>
 </h1>
 
-<%% new_link_content = [content_tag(:i, "", class: "fas fa-plus"), dgettext("mandarin.<%= context.basename %>", " Create New")] %>
+<%% new_link_content = [content_tag(:i, "", class: "fas fa-plus"), dgettext("<%= context.basename %>", " Create New")] %>
 <span><%%= link new_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :new), class: "btn btn-block btn-primary my-3" %></span>
 
 <%%# Table %>
@@ -13,8 +13,8 @@
 <%%= <%= context.basename %>_<%= schema.singular %>_pagination_widget(
         @conn,
         @<%= schema.pluralized %>,
-        previous: dgettext("mandarin.<%= context.basename %>", "← Previous"),
-        next: dgettext("mandarin.<%= context.basename %>", "Next →")
+        previous: dgettext("<%= context.basename %>", "← Previous"),
+        next: dgettext("<%= context.basename %>", "Next →")
       ) %>
 
 <%%# Filters %>

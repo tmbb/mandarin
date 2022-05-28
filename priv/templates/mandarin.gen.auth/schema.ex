@@ -1,6 +1,7 @@
 defmodule <%= inspect schema.module %> do
   use Ecto.Schema
   import Ecto.Changeset
+  import <%= inspect context.web_module %>.Gettext
 <%= if schema.binary_id do %>  @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id<% end %>
   schema <%= inspect schema.table %> do
@@ -39,7 +40,7 @@ defmodule <%= inspect schema.module %> do
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: dgettext("schema.singular", "must have the @ sign and no spaces"))
     |> validate_length(:email, max: 160)
     |> unsafe_validate_unique(:email, <%= inspect schema.repo %>)
     |> unique_constraint(:email)
@@ -81,7 +82,7 @@ defmodule <%= inspect schema.module %> do
     |> validate_email()
     |> case do
       %{changes: %{email: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :email, "did not change")
+      %{} = changeset -> add_error(changeset, :email, dgettext("schema.singular", "did not change"))
     end
   end
 
@@ -100,7 +101,7 @@ defmodule <%= inspect schema.module %> do
   def password_changeset(<%= schema.singular %>, attrs, opts \\ []) do
     <%= schema.singular %>
     |> cast(attrs, [:password])
-    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_confirmation(:password, message: dgettext("schema.singular", "does not match password"))
     |> validate_password(opts)
   end
 
@@ -135,7 +136,7 @@ defmodule <%= inspect schema.module %> do
     if valid_password?(changeset.data, password) do
       changeset
     else
-      add_error(changeset, :current_password, "is not valid")
+      add_error(changeset, :current_password, dgettext("schema.singular", "is not valid"))
     end
   end
 end

@@ -19,7 +19,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
     case <%= inspect context.alias %>.create_<%= schema.singular %>(<%= schema.singular %>_params) do
       {:ok, <%= schema.singular %>} ->
         conn
-        |> put_flash(:info, dgettext("mandarin.<%= context.basename %>", "<%= schema.human_singular %> created successfully."))
+        |> put_flash(:info, dgettext("<%= context.basename %>", "<%= schema.human_singular %> created successfully."))
         |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, <%= schema.singular %>))
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -44,7 +44,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
     case <%= inspect context.alias %>.update_<%= schema.singular %>(<%= schema.singular %>, <%= schema.singular %>_params) do
       {:ok, <%= schema.singular %>} ->
         conn
-        |> put_flash(:info, dgettext("mandarin.<%= context.basename %>", "<%= schema.human_singular %> updated successfully."))
+        |> put_flash(:info, dgettext("<%= context.basename %>", "<%= schema.human_singular %> updated successfully."))
         |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, <%= schema.singular %>))
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -59,7 +59,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Modu
     redirect_params = ForageController.pagination_from_params(params)
 
     conn
-    |> put_flash(:info, dgettext("mandarin.<%= context.basename %>", "<%= schema.human_singular %> deleted successfully."))
+    |> put_flash(:info, dgettext("<%= context.basename %>", "<%= schema.human_singular %> deleted successfully."))
     |> redirect(to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :index, redirect_params))
   end
 <% display_field = Mix.Mandarin.Schema.default_search_field(schema) %><%= if display_field do %>

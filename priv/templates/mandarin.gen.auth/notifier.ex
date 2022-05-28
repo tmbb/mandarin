@@ -22,9 +22,9 @@ defmodule <%= inspect context.module %>.<%= inspect schema.alias %>Notifier do
   Deliver instructions to confirm account.
   """
   def deliver_confirmation_instructions(<%= schema.singular %>, url) do
-    title = dgettext("mandarin.<%= schema.context_underscore %>", "Confirmation instructions")
+    title = dgettext("<%= schema.context_underscore %>", "Confirmation instructions")
 
-    message = dgettext("mandarin.<%= schema.context_underscore %>", """
+    message = dgettext("<%= schema.context_underscore %>", """
 
       ==============================
 
@@ -46,9 +46,9 @@ defmodule <%= inspect context.module %>.<%= inspect schema.alias %>Notifier do
   Deliver instructions to reset a <%= schema.singular %> password.
   """
   def deliver_reset_password_instructions(<%= schema.singular %>, url) do
-    title = dgettext("mandarin.<%= schema.context_underscore %>", "Reset password instructions")
+    title = dgettext("<%= schema.context_underscore %>", "Reset password instructions")
 
-    message = dgettext("mandarin.<%= schema.context_underscore %>", """
+    message = dgettext("<%= schema.context_underscore %>", """
 
       ==============================
 
@@ -70,9 +70,9 @@ defmodule <%= inspect context.module %>.<%= inspect schema.alias %>Notifier do
   Deliver instructions to update a <%= schema.singular %> email.
   """
   def deliver_update_email_instructions(<%= schema.singular %>, url) do
-    title = dgettext("mandarin.<%= schema.context_underscore %>", "Update email instructions")
+    title = dgettext("<%= schema.context_underscore %>", "Update email instructions")
 
-    message = dgettext("mandarin.<%= schema.context_underscore %>", """
+    message = dgettext("<%= schema.context_underscore %>", """
 
       ==============================
 

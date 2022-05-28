@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   functions for the given resource.
 
   > Note: A resource may also be split
-  > over distinct contexts (such as `admin.User` and `Payments.User`).
+  > over distinct contexts (such as `Admin.User` and `Payments.User`).
 
   The schema is responsible for mapping the database fields into an
   Elixir struct.
@@ -349,7 +349,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   end
 
   defp i18n_label_for(context, key) do
-    ~s[dgettext("mandarin.#{context.basename}", #{label_for(key)})]
+    ~s[dgettext("#{context.basename}", #{label_for(key)})]
   end
 
   def inputs(%Context{schema: schema} = context) do

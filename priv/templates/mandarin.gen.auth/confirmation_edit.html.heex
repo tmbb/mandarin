@@ -1,12 +1,12 @@
-<h1><%%= dgettext("mandarin.<%= schema.context_underscore %>", "Confirm account") %></h1>
+<h1><%%= dgettext("<%= schema.context_underscore %>", "Confirm account") %></h1>
 
 <.form let={_f} for={:<%= schema.singular %>} action={Routes.<%= schema.route_helper %>_confirmation_path(@conn, :update, @token)}>
   <div>
-    <%%= forage_submit dgettext("mandarin.<%= schema.context_underscore %>", "Confirm my account") %>
+    <%%= forage_submit dgettext("<%= schema.context_underscore %>", "Confirm my account") %>
   </div>
 </.form>
 
 <p>
-  <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Register"), to: Routes.<%= schema.route_helper %>_registration_path(@conn, :new) %> |
-  <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Log in"), to: Routes.<%= schema.route_helper %>_session_path(@conn, :new) %>
+  <%%= link dgettext("<%= schema.context_underscore %>", "Register"), to: Routes.<%= schema.route_helper %>_registration_path(@conn, :new) %> |
+  <%%= link dgettext("<%= schema.context_underscore %>", "Log in"), to: Routes.<%= schema.route_helper %>_session_path(@conn, :new) %>
 </p>

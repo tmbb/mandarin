@@ -17,7 +17,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
 
     info_message =
       dgettext(
-        "mandarin.<%= schema.context_underscore %>", """
+        "<%= schema.context_underscore %>", """
         If your email is in our system and it has not been confirmed yet, \
         you will receive an email with instructions shortly.\
         """)
@@ -36,11 +36,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
   def update(conn, %{"token" => token}) do
     case <%= inspect context.alias %>.confirm_<%= schema.singular %>(token) do
       {:ok, _} ->
-        info_message =
-          dgettext(
-            "mandarin.<%= schema.context_underscore %>",
-            "<%= schema.human_singular %> confirmed successfully."
-          )
+        info_message = dgettext("<%= schema.context_underscore %>", "<%= schema.human_singular %> confirmed successfully.")
 
         conn
         |> put_flash(:info, info_message)
@@ -56,11 +52,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
             redirect(conn, to: "/")
 
           %{} ->
-            error_message =
-              dgettext(
-                "mandarin.<%= schema.context_underscore %>",
-                "<%= schema.human_singular %> confirmation link is invalid or it has expired."
-              )
+            error_message = dgettext("<%= schema.context_underscore %>", "<%= schema.human_singular %> confirmation link is invalid or it has expired.")
 
             conn
             |> put_flash(:error, error_message)

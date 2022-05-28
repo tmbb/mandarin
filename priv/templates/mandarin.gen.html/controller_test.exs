@@ -1,28 +1,29 @@
-defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= Module.concat(schema.web_namespace, schema.alias) %>ControllerTest do
+defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= inspect Module.concat(schema.web_namespace, schema.alias) %>ControllerTest do
   use <%= inspect context.web_module %>.ConnCase
 
-  alias <%= inspect context.module %>
+  import <%= inspect context.module %>Fixtures
 
   @create_attrs <%= inspect schema.params.create %>
   @update_attrs <%= inspect schema.params.update %>
   @invalid_attrs <%= inspect for {key, _} <- schema.params.create, into: %{}, do: {key, nil} %>
 
-  def fixture(:<%= schema.singular %>) do
-    {:ok, <%= schema.singular %>} = <%= inspect context.alias %>.create_<%= schema.singular %>(@create_attrs)
-    <%= schema.singular %>
-  end
-
   describe "index" do
     test "lists all <%= schema.pluralized %>", %{conn: conn} do
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :index)
-      assert html_response(conn, 200) =~ "Browse <%= schema.human_pluralized %>"
+      html = html_response(conn, 200)
+
+      assert html =~ "Browse"
+      assert html =~ "<%= schema.human_pluralized %>"
     end
   end
 
   describe "new <%= schema.singular %>" do
     test "renders form", %{conn: conn} do
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :new)
-      assert html_response(conn, 200) =~ "New <%= schema.human_singular %>"
+      html = html_response(conn, 200)
+
+      assert html =~ "New"
+      assert html =~ "<%= schema.human_singular %>"
     end
   end
 
@@ -34,12 +35,18 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= Module.conca
       assert redirected_to(conn) == Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, id)
 
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :show, id)
-      assert html_response(conn, 200) =~ "Show <%= schema.human_singular %>"
+      html = html_response(conn, 200)
+
+      assert html =~ "Show"
+      assert html =~ "<%= schema.human_singular %>"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :create), <%= schema.singular %>: @invalid_attrs
-      assert html_response(conn, 200) =~ "New <%= schema.human_singular %>"
+      html = html_response(conn, 200)
+
+      assert html =~ "New"
+      assert html =~ "<%= schema.human_singular %>"
     end
   end
 
@@ -48,7 +55,10 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= Module.conca
 
     test "renders form for editing chosen <%= schema.singular %>", %{conn: conn, <%= schema.singular %>: <%= schema.singular %>} do
       conn = get conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :edit, <%= schema.singular %>)
-      assert html_response(conn, 200) =~ "Edit <%= schema.human_singular %>"
+      html = html_response(conn, 200)
+
+      assert html =~ "Edit"
+      assert html =~ "<%= schema.human_singular %>"
     end
   end
 
@@ -66,7 +76,10 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= Module.conca
 
     test "renders errors when data is invalid", %{conn: conn, <%= schema.singular %>: <%= schema.singular %>} do
       conn = put conn, Routes.<%= context.basename %>_<%= schema.route_helper %>_path(conn, :update, <%= schema.singular %>), <%= schema.singular %>: @invalid_attrs
-      assert html_response(conn, 200) =~ "Edit <%= schema.human_singular %>"
+      html = html_response(conn, 200)
+
+      assert html =~ "Edit"
+      assert html =~ "<%= schema.human_singular %>"
     end
   end
 
@@ -83,7 +96,7 @@ defmodule <%= inspect context.web_module %>.<%= context.name %>.<%= Module.conca
   end
 
   defp create_<%= schema.singular %>(_) do
-    <%= schema.singular %> = fixture(:<%= schema.singular %>)
-    {:ok, <%= schema.singular %>: <%= schema.singular %>}
+    <%= schema.singular %> = <%= schema.singular %>_fixture()
+    %{<%= schema.singular %>: <%= schema.singular %>}
   end
 end

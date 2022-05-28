@@ -25,8 +25,8 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       new_password_conn =
         put(conn, Routes.<%= schema.route_helper %>_settings_path(conn, :update), %{
           "action" => "update_password",
-          "current_password" => valid_<%= schema.singular %>_password(),
           "<%= schema.singular %>" => %{
+            "current_password" => valid_<%= schema.singular %>_password(),
             "password" => "new valid password",
             "password_confirmation" => "new valid password"
           }
@@ -42,8 +42,8 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       old_password_conn =
         put(conn, Routes.<%= schema.route_helper %>_settings_path(conn, :update), %{
           "action" => "update_password",
-          "current_password" => "invalid",
           "<%= schema.singular %>" => %{
+            "current_password" => "invalid",
             "password" => "too short",
             "password_confirmation" => "does not match"
           }
@@ -65,8 +65,10 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn =
         put(conn, Routes.<%= schema.route_helper %>_settings_path(conn, :update), %{
           "action" => "update_email",
-          "current_password" => valid_<%= schema.singular %>_password(),
-          "<%= schema.singular %>" => %{"email" => unique_<%= schema.singular %>_email()}
+          "<%= schema.singular %>" => %{
+            "email" => unique_<%= schema.singular %>_email(),
+            "current_password" => valid_<%= schema.singular %>_password(),
+          }
         })
 
       assert redirected_to(conn) == Routes.<%= schema.route_helper %>_settings_path(conn, :edit)
@@ -78,8 +80,10 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       conn =
         put(conn, Routes.<%= schema.route_helper %>_settings_path(conn, :update), %{
           "action" => "update_email",
-          "current_password" => "invalid",
-          "<%= schema.singular %>" => %{"email" => "with spaces"}
+          "<%= schema.singular %>" => %{
+            "email" => "with spaces",
+            "current_password" => "invalid"
+          }
         })
 
       response = html_response(conn, 200)

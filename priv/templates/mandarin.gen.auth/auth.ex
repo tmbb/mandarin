@@ -131,11 +131,7 @@ defmodule <%= inspect auth_module %> do
     if conn.assigns[:current_<%= schema.singular %>] do
       conn
     else
-      error_message =
-        dgettext(
-          "mandarin.<%= schema.context_underscore %>",
-          "You must log in to access this page."
-        )
+      error_message = dgettext("<%= schema.context_underscore %>", "You must log in to access this page.")
 
       conn
       |> put_flash(:error, error_message)

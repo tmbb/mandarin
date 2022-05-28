@@ -1,8 +1,8 @@
-<h4><%%= dgettext("mandarin.<%= context.basename %>", "Search filters") %></h4>
+<h4><%%= dgettext("<%= context.basename %>", "Search filters") %></h4>
 
 <%%= <%= context.basename %>_<%= schema.singular %>_filter_form_for @conn, [], fn f -> %>
 <%= for filter <- filters, filter do %><%= filter %>
 
-<% end %>  <%% search_button_content = [content_tag(:i, "", class: "fas fa-search"), dgettext("mandarin.<%= context.basename %>", " Search")] %>
+<% end %>  <%% search_button_content = [content_tag(:i, "", class: "fas fa-search"), dgettext("<%= context.basename %>", " Search")] %>
   <%%= forage_submit search_button_content, class: "btn btn-block btn-primary" %>
 <%% end %>

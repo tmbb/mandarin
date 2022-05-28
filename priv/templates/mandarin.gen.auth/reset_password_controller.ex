@@ -17,11 +17,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
       )
     end
 
-    info_message =
-      dgettext(
-        "mandarin.<%= schema.context_underscore %>",
-        "If your email is in our system, you will receive instructions to reset your password shortly."
-      )
+    info_message = dgettext("<%= schema.context_underscore %>", "If your email is in our system, you will receive instructions to reset your password shortly.")
 
     conn
     |> put_flash(:info, info_message)
@@ -37,11 +33,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
   def update(conn, %{"<%= schema.singular %>" => <%= schema.singular %>_params}) do
     case <%= inspect context.alias %>.reset_<%= schema.singular %>_password(conn.assigns.<%= schema.singular %>, <%= schema.singular %>_params) do
       {:ok, _} ->
-        info_message =
-          dgettext(
-            "mandarin.<%= schema.context_underscore %>",
-            "Password reset successfully."
-          )
+        info_message = dgettext("<%= schema.context_underscore %>", "Password reset successfully.")
 
         conn
         |> put_flash(:info, info_message)
@@ -58,11 +50,7 @@ defmodule <%= inspect context.web_module %>.<%= inspect Module.concat(schema.web
     if <%= schema.singular %> = <%= inspect context.alias %>.get_<%= schema.singular %>_by_reset_password_token(token) do
       conn |> assign(:<%= schema.singular %>, <%= schema.singular %>) |> assign(:token, token)
     else
-      error_message =
-        dgettext(
-          "mandarin.<%= schema.context_underscore %>",
-          "Reset password link is invalid or it has expired."
-        )
+      error_message = dgettext("<%= schema.context_underscore %>", "Reset password link is invalid or it has expired.")
 
       conn
       |> put_flash(:error, error_message)

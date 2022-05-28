@@ -120,6 +120,7 @@ defmodule Mix.Tasks.Mandarin.Install do
   def files_to_be_generated(%Install{} = install) do
     context_app = install.context_app
     ctx_basename = install.context_underscore
+    user_entity_name = install.user_entity_name
 
     web_prefix = Mix.Mandarin.web_path(context_app)
     # TODO: add tests for this functionality (at least for the index controller)
@@ -144,14 +145,26 @@ defmodule Mix.Tasks.Mandarin.Install do
 
     layout_sidebar_template_path = sidebar_path(context_app, install.context_underscore)
 
-    # Only generate this file if it doesn't exist already
-    # (it's quite likely that the user will want to customize this file)
+    # Only generate this file if it doesn't exist already.
+    # It's quite likely that the user will want to customize this file
+    # but quite unlikely that the user will want different MandarinWeb modules
+    # for different mandarin contexts.
     maybe_mandarin_web =
       case File.exists?(mandarin_web_path) do
         # The file that will allow Mandarin to use "vertical slices" even if the rest
         # of the application uses the (IMO inferior) horizontal slices.
         false -> [{:eex, "mandarin_web.ex", mandarin_web_path}]
         true -> []
+      end
+
+    maybe_menu_web =
+      case install.user_entity_name do
+        nil ->
+          []
+
+        _name ->
+          menu_template_path = Path.join(layout_templates_dir, "_#{user_entity_name}_menu.html.heex")
+          [{:eex, "_menu.html.heex", menu_template_path}]
       end
 
     web_templates = [
@@ -168,7 +181,7 @@ defmodule Mix.Tasks.Mandarin.Install do
       {:eex, "sidebar.html.heex", layout_sidebar_template_path}
     ]
 
-    maybe_mandarin_web ++ web_templates
+    maybe_mandarin_web ++ maybe_menu_web ++ web_templates
   end
 
   router_template = "priv/templates/mandarin.install/router.ex"
@@ -194,12 +207,23 @@ defmodule Mix.Tasks.Mandarin.Install do
       context_underscore: ctx,
       web_module: web_module,
       web_path: web_path,
-      layout_view_module: layout_view_module
+      layout_view_module: layout_view_module,
+      user_entity_name: user_entity_name
     } = install
 
     files =
       for {_eex, file, path} <- files_to_be_generated(install), into: %{} do
         {file, path}
+      end
+
+    maybe_menu_html_heex =
+      case user_entity_name do
+        nil ->
+          ""
+
+        name ->
+          filename = "#{name}_menu.html.heex"
+          ~s',\n    #{files[filename]}\n'
       end
 
     Mix.shell().info("""
@@ -210,7 +234,7 @@ defmodule Mix.Tasks.Mandarin.Install do
 
       * "#{files["root.html.heex"]}",
         "#{files["app.html.heex"]}",
-        "#{files["live.html.heex"]}"
+        "#{files["live.html.heex"]}"#{maybe_menu_html_heex}
           - the layout templates for the mandarin pages
 
       * "#{files["sidebar.html.heex"]}"
@@ -227,7 +251,7 @@ defmodule Mix.Tasks.Mandarin.Install do
           - the template for the index page
 
     A new pipeline and a new scope have been injected in the "#{web_path}/router.ex" file.
-    Admin routes should be sent through this pipeline so that they use the right layout:
+    Routes for this context should be sent through this pipeline so that they use the right layout:
 
     The folowing code has been injected into your router (#{web_path}/router.ex):
 

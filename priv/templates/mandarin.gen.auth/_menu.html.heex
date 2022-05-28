@@ -1,22 +1,34 @@
-<ul>
-<%%= if @current_<%= schema.singular %> do %>
-  <li><%%= @current_<%= schema.singular %>.email %></li>
+<%%# This code works even if you haven't fetched the current user %>
+<%%= if Map.get(assigns, :current_<%= schema.singular %>) do %>
+  <li class="nav-item"><%%= @current_<%= schema.singular %>.email %></li>
   <li>
-    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Settings"),
-          to: Routes.<%= schema.route_helper %>_settings_path(@conn, :edit) %>
+    <%%= link dgettext("<%= schema.context_underscore %>", "Settings"),
+          to: Routes.<%= schema.route_helper %>_settings_path(@conn, :edit),
+          class: "nav-link"  %>
   </li>
-  <li>
-    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Log out"),
-          to: Routes.<%= schema.route_helper %>_session_path(@conn, :delete), method: :delete %>
+
+  <li class="nav-item">
+    <%%= link dgettext("<%= schema.context_underscore %>", "Log out"),
+          to: Routes.<%= schema.route_helper %>_session_path(@conn, :delete),
+          method: :delete,
+          class: "nav-link" %>
+  </li>
+
+  <li class="nav-item">
+    <span class="navbar-text ml-4">
+      <span class="fa fa-user"></span> <%%= @current_<%= schema.route_helper %>.email %>
+    </span>
   </li>
 <%% else %>
-  <li>
-    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Register"),
-          to: Routes.<%= schema.route_helper %>_registration_path(@conn, :new) %>
+  <li class="nav-item">
+    <%%= link dgettext("<%= schema.context_underscore %>", "Register"),
+          to: Routes.<%= schema.route_helper %>_registration_path(@conn, :new),
+          class: "nav-link" %>
   </li>
-  <li>
-    <%%= link dgettext("mandarin.<%= schema.context_underscore %>", "Log in"),
-          to: Routes.<%= schema.route_helper %>_session_path(@conn, :new) %>
+
+  <li class="nav-item">
+    <%%= link dgettext("<%= schema.context_underscore %>", "Log in"),
+          to: Routes.<%= schema.route_helper %>_session_path(@conn, :new),
+          class: "nav-link" %>
     </li>
 <%% end %>
-</ul>

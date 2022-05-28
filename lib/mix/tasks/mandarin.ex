@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Mandarin do
 
   @moduledoc """
   Prints Mandarin tasks and their information.
-  
+
       mix mandarin
   """
 
@@ -23,6 +23,6 @@ defmodule Mix.Tasks.Mandarin do
     Mix.shell().info("Generators for your application's admin interface.")
 
     Mix.shell().info("\nAvailable tasks:\n")
-    Mix.Tasks.Help.run(["--search", "mandarin."])
+    Mix.Tasks.Help.run(["--search", ""])
   end
 end

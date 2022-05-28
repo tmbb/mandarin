@@ -2,20 +2,13 @@
   describe "<%= schema.pluralized %>" do
     alias <%= inspect schema.module %>
 
-    @valid_attrs <%= inspect schema.params.create %>
-    @update_attrs <%= inspect schema.params.update %>
-    @invalid_attrs <%= inspect for {key, _} <- schema.params.create, into: %{}, do: {key, nil} %>
+    import <%= inspect context.module %>Fixtures
 
-    def <%= schema.singular %>_fixture(attrs \\ %{}) do
-      {:ok, <%= schema.singular %>} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> <%= inspect context.alias %>.create_<%= schema.singular %>()
+    @invalid_attrs <%= Mix.Mandarin.to_text for {key, _} <- schema.params.create, into: %{}, do: {key, nil} %>
 
-      <%= schema.singular %>
-    end
-
-    test "list_<%= schema.pluralized %>/0 returns all <%= schema.pluralized %>" do
+    test "list_<%= schema.plural %>/1 returns a page containing a number of <%= schema.plural %>" do
+      # Note that `list_<%= schema.plural %>/1` is quite different from the `list_<%= schema.plural %>/0`
+      # function defined by the normal Phoenix generators
       <%= schema.singular %> = <%= schema.singular %>_fixture()
       page = <%= inspect context.alias %>.list_<%= schema.pluralized %>(%{})
       assert page.entries == [<%= schema.singular %>]
@@ -27,7 +20,9 @@
     end
 
     test "create_<%= schema.singular %>/1 with valid data creates a <%= schema.singular %>" do
-      assert {:ok, %<%= inspect schema.alias %>{} = <%= schema.singular %>} = <%= inspect context.alias %>.create_<%= schema.singular %>(@valid_attrs)<%= for {field, value} <- schema.params.create do %>
+      valid_attrs = <%= Mix.Mandarin.to_text schema.params.create %>
+
+      assert {:ok, %<%= inspect schema.alias %>{} = <%= schema.singular %>} = <%= inspect context.alias %>.create_<%= schema.singular %>(valid_attrs)<%= for {field, value} <- schema.params.create do %>
       assert <%= schema.singular %>.<%= field %> == <%= Mix.Mandarin.Schema.value(schema, field, value) %><% end %>
     end
 
@@ -37,8 +32,9 @@
 
     test "update_<%= schema.singular %>/2 with valid data updates the <%= schema.singular %>" do
       <%= schema.singular %> = <%= schema.singular %>_fixture()
-      assert {:ok, %<%= inspect schema.alias %>{} = <%= schema.singular %>} = <%= inspect context.alias %>.update_<%= schema.singular %>(<%= schema.singular %>, @update_attrs)
-      <%= for {field, value} <- schema.params.update do %>
+      update_attrs = <%= Mix.Mandarin.to_text schema.params.update%>
+
+      assert {:ok, %<%= inspect schema.alias %>{} = <%= schema.singular %>} = <%= inspect context.alias %>.update_<%= schema.singular %>(<%= schema.singular %>, update_attrs)<%= for {field, value} <- schema.params.update do %>
       assert <%= schema.singular %>.<%= field %> == <%= Mix.Mandarin.Schema.value(schema, field, value) %><% end %>
     end
 
