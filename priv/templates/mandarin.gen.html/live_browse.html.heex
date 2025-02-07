@@ -1,0 +1,66 @@
+<.header>
+  <%%= dgettext("<%= context.basename %>", "Listing <%= schema.human_plural %>") %>
+</.header>
+
+<.bulk_action id="bulk_action" active={@ids_marked_for_bulk_action != []}>
+  <:action navigate={~p"<%= schema.route_prefix %>/new"}>
+    <%%= dgettext("<%= context.basename %>", "New <%= schema.human_singular %>") %>
+  </:action>
+  <:action name="bulk_delete"
+           confirmation_dialog="confirm_bulk_delete">
+    <%%= dgettext("<%= context.basename %>", "Bulk delete <%= schema.human_plural %>") %>
+  </:action>
+
+  <Flop.Phoenix.table id="<%= schema.plural %>"
+                      items={@<%= schema.plural %>}
+                      meta={@meta}
+                      path={~p"<%= schema.route_prefix %>"}
+                      opts={flop_table_options()}>
+    <:col :let={<%= schema.singular %>}><.bulk_action_select target={<%= schema.singular %>.id}/></:col><%=
+    for tuple <- schema.attrs ++ schema.assocs do %><% k = elem(tuple, 0); is_assoc = tuple_size(tuple) == 4; k_str = Atom.to_string(k) %>
+    <%= if is_assoc do %><:col :let={<%= schema.singular %>} field={:<%= schema.singular %>} label="<%= Mandarin.Naming.humanize(k_str) %>"><%%= Bootstrap5Components.as_link(<%= schema.singular %>.<%= k %>) %></:col><% 
+    else %><:col :let={<%= schema.singular %>} field={:<%= schema.singular %>} label="<%= Mandarin.Naming.humanize(k_str) %>"><%%= <%= schema.singular %>.<%= k %> %></:col><% end %><% end %>
+    <:action :let={<%= schema.singular %>}>
+      <span style="white-space: nowrap;"> 
+          <.link navigate={~p"<%= schema.route_prefix %>/#{<%= schema.singular %>}"}
+            ><.icon name="eye"
+                    title={dgettext("<%= context.basename %>", "Delete")}/></.link>
+          <.link navigate={~p"<%= schema.route_prefix %>/#{<%= schema.singular %>}/edit"}
+            ><.icon name="pencil-square"
+                    title={dgettext("<%= context.basename %>", "Edit")}/></.link>
+          <.link href={"#"}
+                phx-click={
+                  show_modal("confirm_delete")
+                  |> JS.push("delete", value: %{id: <%= schema.singular %>.id})
+                }
+            ><.icon name="trash"
+                    title={dgettext("<%= context.basename %>", "Delete")}/></.link>
+        </span>
+    </:action>
+  </Flop.Phoenix.table>
+</.bulk_action>
+
+<div class="d-flex justify-content-center mt-3">
+  <Flop.Phoenix.pagination
+    meta={@meta}
+    path={~p"<%= schema.route_prefix %>/"} 
+    opts={flop_pagination_options()} />
+</div>
+
+<.modal id="confirm_delete"
+        on_confirm={JS.push("confirm_delete")}>
+  <:title>Confirm deletion</:title>
+  <:confirm>Yes, delete this <%= schema.human_singular %></:confirm>
+  <:cancel>Cancel</:cancel>
+  
+  Are you sure you want to delete this <%= schema.human_singular %>?
+</.modal>
+
+<.modal id="confirm_bulk_delete"
+        on_confirm={JS.push("confirm_bulk_delete")}>
+  <:title>Confirm deletion</:title>
+  <:confirm>Yes, delete all selected <%= schema.human_plural %></:confirm>
+  <:cancel>Cancel</:cancel>
+  
+  Are you sure you want to delete all the selected <%= schema.human_plural %>?
+</.modal>

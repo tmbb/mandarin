@@ -1,0 +1,26 @@
+<.header>
+  <%= schema.human_singular %>
+  <:actions>
+    <.link navigate={~p"<%= schema.route_prefix %>/#{@<%= schema.singular %>}/edit"}>
+      <.button>Edit <%= schema.singular %></.button>
+    </.link>
+  </:actions>
+</.header>
+
+<p>This is a <%= schema.singular %> record from your database.</p>
+
+<table class="table">
+  <tbody><%= for tuple <- schema.attrs ++ schema.assocs do %><%
+              k = elem(tuple, 0)
+              is_assoc? = tuple_size(tuple) == 4
+              k_str = Atom.to_string(k)
+          %>
+    <tr>
+      <td><strong><%= Mandarin.Naming.humanize(k_str) %></strong></td>
+      <%= if is_assoc? do %><td><%%= Bootstrap5Components.as_link(@<%= schema.singular %>.<%= k %>) %></td><% 
+      else %><td><%%= @<%= schema.singular %>.<%= k %> %></td><% end %>
+    </tr><% end %>
+  </tbody>
+</table>
+
+<.back navigate={~p"<%= schema.route_prefix %>"}>Back to <%= schema.plural %></.back>

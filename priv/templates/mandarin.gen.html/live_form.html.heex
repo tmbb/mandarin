@@ -1,0 +1,19 @@
+<.header :if={@form[:id].value in ["", nil]}>
+  New <%= schema.human_singular %>
+</.header>
+
+<.header :if={@form[:id].value not in ["", nil]}>
+  Edit <%= schema.human_singular %>
+</.header>
+
+<.simple_form for={@form} action={@action} phx-change="validate" phx-submit="save">
+  <.input field={@form[:id]} type="hidden"/>
+<%= Mix.Tasks.Mandarin.Gen.Html.indent_inputs(inputs, 2) %>
+  <:actions>
+    <.button>Save <%= schema.human_singular %></.button>
+  </:actions>
+</.simple_form>
+
+<hr/>
+
+<.link href={~p"<%= schema.route_prefix %>"}>Back to <%= context.human_singular %></.link>

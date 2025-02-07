@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title suffix=" · Phoenix Framework">
+      <%%= assigns[:page_title] || "Demo17" %>
+    </.live_title>
+    <.css_assets theme="cerulean"/>
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+  </head>
+  <body>
+    <.navbar>
+      <:start_group>
+        <.navbar_link to={~p"/"}>
+          Phoenix v<%%= Application.spec(:phoenix, :vsn) %>
+        </.navbar_link>
+      </:start_group>
+    </.navbar>
+    
+    <.main>
+      <:sidebar>
+        <.sidebar_link_group>
+          <.sidebar_link to={~p"/"}><%%= gettext("Home") %></.sidebar_link>
+        </.sidebar_link_group>
+      </:sidebar>
+      <:content>
+        <%%= @inner_content %>
+      </:content>
+    </.main>
+  </body>
+</html>

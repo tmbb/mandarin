@@ -1,0 +1,18 @@
+<.header :if={@form[:id].value in ["", nil]}>
+  New Project
+</.header>
+
+<.header :if={@form[:id].value not in ["", nil]}>
+  Edit Project
+</.header>
+
+<.simple_form for={@form} action={@action}>
+  <.input field={@form[:id]} type="hidden"/>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+<%= Mix.Tasks.Mandarin.Gen.Html.indent_inputs(inputs, 2) %>
+  <:actions>
+    <.button>Save <%= schema.human_singular %></.button>
+  </:actions>
+</.simple_form>
