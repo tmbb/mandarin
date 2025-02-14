@@ -128,9 +128,9 @@
   """
   def create_<%= schema.singular %>(attrs \\ %{}) do
     %<%= inspect schema.alias %>{}
+    |> Repo.preload(@<%= schema.singular %>_preloads)
     |> <%= inspect schema.alias %>.changeset(attrs)
     |> Repo.insert()
-    |> Repo.preload_in_result(@<%= schema.singular %>_preloads)
   end
 
   @doc """
@@ -160,9 +160,9 @@
   """
   def update_<%= schema.singular %>(%<%= inspect schema.alias %>{} = <%= schema.singular %>, attrs) do
     <%= schema.singular %>
+    |> Repo.preload(@<%= schema.singular %>_preloads)
     |> <%= inspect schema.alias %>.changeset(attrs)
     |> Repo.update()
-    |> Repo.preload_in_result(@<%= schema.singular %>_preloads)
   end
 
   @doc """

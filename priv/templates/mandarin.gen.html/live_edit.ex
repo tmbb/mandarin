@@ -69,6 +69,10 @@ defmodule <%= inspect Module.concat([context.web_module, schema.web_namespace, s
   # Handle notifications from other clients editing the <%= schema.human_singular %>.
   # These handlers are not activated if the client has been edited by the same process.
 
+  def handle_info({:resource_created, _id, _meta}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info({:draft_updated, <%= schema.singular %>_params, _meta}, socket) do
     update_draft_<%= schema.singular %>(<%= schema.singular %>_params, socket)
   end
@@ -112,7 +116,7 @@ defmodule <%= inspect Module.concat([context.web_module, schema.web_namespace, s
   def handle_event("validate", %{"<%= schema.singular %>" => <%= schema.singular %>_params}, socket) do
      # Are we validating a form for a <%= schema.human_singular %> that already exists?
      case <%= schema.singular %>_params do
-      %{"id" => <%= schema.singular %>_id} ->
+      %{"id" => <%= schema.singular %>_id} when <%= schema.singular %>_id not in ["", nil] ->
         # Subscribe to the <%= schema.human_singular %> resource we're editing.
         # Subscribe to the main channel to be notified if the resource is deleted.
         MandarinNotifications.subscribe("<%= schema.singular %>")
@@ -131,7 +135,7 @@ defmodule <%= inspect Module.concat([context.web_module, schema.web_namespace, s
   def handle_event("save", %{"<%= schema.singular %>" => <%= schema.singular %>_params}, socket) do
     # Are we saving a <%= schema.human_singular %> that already exists or are we creating a new one?
     case <%= schema.singular %>_params do
-      %{"id" => <%= schema.singular %>_id} when not is_nil(<%= schema.singular %>_id) ->
+      %{"id" => <%= schema.singular %>_id} when <%= schema.singular %>_id not in ["", nil] ->
         update_<%= schema.singular %>(<%= schema.singular %>_id, <%= schema.singular %>_params, socket)
 
       _non_nil ->
@@ -169,6 +173,12 @@ defmodule <%= inspect Module.concat([context.web_module, schema.web_namespace, s
             # Subscribe to the main channel to be notified if the resource is deleted.
             MandarinNotifications.subscribe("<%= schema.singular %>")
             MandarinNotifications.subscribe("<%= schema.singular %>:#{<%= schema.singular %>.id}")
+
+            # Notify sessions that are listening to the whole list
+            MandarinNotifications.notify(
+              "<%= schema.singular %>",
+              {:resource_created, <%= schema.singular %>.id, %{}}
+            )
 
             {:noreply, socket}
 

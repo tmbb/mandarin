@@ -76,7 +76,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
 
   use Mix.Task
 
-  alias Mix.Mandarin.{Context, Injector, Schema}
+  alias Mix.Mandarin.{Context, Schema}
   alias Mix.Tasks.Mandarin.Gen
 
   @switches [
@@ -163,7 +163,6 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
   @doc false
   def copy_new_files(%Context{schema: schema} = context, paths, binding) do
     if schema.generate?, do: Gen.Schema.copy_new_files(schema, paths, binding)
-    inject_extra_code_in_repo(context, paths, binding)
     inject_schema_access(context, paths, binding)
     inject_tests(context, paths, binding)
     inject_test_fixture(context, paths, binding)
@@ -178,24 +177,6 @@ defmodule Mix.Tasks.Mandarin.Gen.Context do
         file,
         Mix.Mandarin.eval_from(paths, "priv/templates/mandarin.gen.context/context.ex", binding)
       )
-    end
-  end
-
-  defp inject_extra_code_in_repo(%Context{} = context, _paths, _binding) do
-    repo_path = Mix.Mandarin.context_lib_path(context.context_app, "repo.ex")
-    repo_contents = File.read!(repo_path)
-
-    code_to_inject = """
-
-      use EctoPreloadInResult
-    """
-
-    case Injector.inject_before_final_end(repo_contents, code_to_inject) do
-      :already_injected ->
-        :ok
-
-      {:ok, new_repo_contents} ->
-        File.write!(repo_path, new_repo_contents)
     end
   end
 

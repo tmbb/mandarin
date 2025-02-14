@@ -46,6 +46,17 @@ defmodule <%= inspect Module.concat([context.web_module, schema.web_namespace, s
   # Handle notifications from other clients editing the <%= schema.human_singular %>.
   # These handlers are not activated if the client has been edited by the same process.
 
+  def handle_info({:resource_created, _id, _meta}, socket) do
+    message = dgettext("<%= context.basename %>", "<%= schema.human_singular %> created in other session.")
+
+    socket =
+      socket
+      |> put_flash(:info, message)
+      |> push_patch(to: "<%= schema.route_prefix %>")
+
+    {:noreply, socket}
+  end
+
   def handle_info({:resource_deleted, id, _meta}, socket) do
     message = dgettext("<%= context.basename %>", "<%= schema.human_singular %> deleted in other session.")
 
